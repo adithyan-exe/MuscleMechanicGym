@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Muscle Mechanic – Membership Manager</title>
+<meta name="theme-color" content="#151516">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpolygon points='16,2 28,9 28,23 16,30 4,23 4,9' fill='%23ffd400'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23000'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Big+Shoulders+Display:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f5f0; --panel:#ffffff; --panel2:#faf9f3; --line:#e8e6dc;
+  --ink:#111111; --text:#141414; --mute:#6d6b62;
+  --y:#ffd400; --yb:#e9c500; --ydeep:#8a6d00; --black:#0c0c0c;
+  --red:#d03a27; --orange:#b85f00; --blue:#2563c9; --green:#0b8a43;
+  --r:8px; --rl:12px; color-scheme:light;
+  --shadow:0 1px 2px rgba(0,0,0,.04),0 12px 32px rgba(30,28,10,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:15px/1.5 'Barlow',system-ui,'Segoe UI',Arial,sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:'Big Shoulders Display',Impact,'Arial Narrow',sans-serif;text-transform:uppercase;letter-spacing:.02em;margin:0;font-weight:800;line-height:1.05;color:var(--ink)}
+h1{font-size:42px} h2{font-size:26px} h3{font-size:19px;letter-spacing:.04em}
+button{font:inherit;cursor:pointer}
+a{color:var(--ydeep)}
+:focus-visible{outline:2px solid var(--black);outline-offset:2px}
+*{scrollbar-width:thin;scrollbar-color:#c8c6ba transparent}
+
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.side{background:var(--black);color:#fff;border-right:1px solid var(--yb);position:sticky;top:0;height:100vh;display:flex;flex-direction:column;overflow-y:auto}
+.brand{padding:26px 20px 22px;display:flex;gap:12px;align-items:center}
+.brand svg{flex:none}
+.brand .nm{font-family:'Big Shoulders Display',Impact,sans-serif;font-weight:900;font-size:28px;line-height:.92;text-transform:uppercase;color:#fff}
+.brand .nm span{display:block}
+.brand .nm .y{color:var(--y)}
+.hazard{height:1px;background:linear-gradient(90deg,var(--y),rgba(255,212,0,.15))}
+.nav{padding:16px 10px;flex:1}
+.nav button{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;background:none;border:0;border-left:3px solid transparent;border-radius:6px;color:#a9a79d;padding:11px 14px;margin-bottom:2px;font-weight:600;font-size:15px;transition:background .15s,color .15s}
+.nav button:hover{color:#fff;background:rgba(255,255,255,.06)}
+.nav button.on{color:var(--y);background:rgba(255,212,0,.09);border-left-color:var(--y)}
+.nav .bd{background:#ff5a47;color:#000;border-radius:99px;font-size:12px;font-weight:700;padding:0 7px;min-width:20px;text-align:center}
+.side .foot{padding:16px 20px;color:#77756c;font-size:12px;border-top:1px solid #1f1f1f}
+
+.main{padding:30px 38px 64px;min-width:0}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.top .sub{color:var(--mute);margin-top:6px}
+
+.btn{background:#fff;color:var(--ink);border:1px solid #d6d4c8;border-radius:var(--r);padding:8px 15px;font-weight:600;text-decoration:none;display:inline-block;transition:border-color .15s,background .15s,box-shadow .15s}
+.btn:hover{border-color:var(--yb);background:#fffbe3}
+.btn.primary{background:var(--black);color:#fff;border:1px solid var(--y)}
+.btn.primary:hover{background:#1b1b1b;border-color:var(--y);box-shadow:0 0 0 3px rgba(255,212,0,.3)}
+.btn.danger{color:var(--red);border-color:#efc7c1}
+.btn.danger:hover{border-color:var(--red);background:#fff4f2}
+.btn.sm{padding:4px 11px;font-size:13px}
+.btn.wa{color:var(--green);border-color:#bfe3cf}
+.btn.wa:hover{border-color:var(--green);background:#f1fbf5}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* dashboard */
+.hero{position:relative;overflow:hidden;color:#fff;display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;padding:26px 30px 24px;border:1px solid var(--y);border-radius:var(--rl);background:linear-gradient(120deg,#1c1c1c 0%,#0b0b0b 55%);box-shadow:var(--shadow)}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.05) 47%,rgba(255,226,120,.05) 52%,transparent 58%);pointer-events:none}
+.hero>*{position:relative;z-index:1}
+.hero .big{font-family:'Big Shoulders Display',Impact,sans-serif;font-weight:900;font-size:clamp(72px,12vw,128px);line-height:.85;color:#ffd400;background:linear-gradient(180deg,#fff3a8 0%,#ffd400 50%,#c79f00 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero .lbl{font-weight:600;font-size:16px;color:#b9b7ac;margin-bottom:6px}
+.hero .side2{text-align:right;font-weight:500;font-size:15px;line-height:1.7;color:#b9b7ac}
+.hero .side2 b{font-family:'Big Shoulders Display',Impact,sans-serif;font-size:26px;font-weight:800;color:#fff}
+.herostripe{display:none}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));background:#fff;border:1px solid var(--yb);border-radius:var(--rl);box-shadow:var(--shadow);margin:20px 0 26px;overflow:hidden}
+.stat{padding:18px 22px;border-right:1px solid var(--line);background:none;border-top:0;border-bottom:0;border-left:0;color:inherit;text-align:left}
+.stat:last-child{border-right:0}
+button.stat{cursor:pointer;transition:background .15s}
+button.stat:hover{background:#fffcec}
+.stat .v{font-family:'Big Shoulders Display',Impact,sans-serif;font-weight:800;font-size:34px;line-height:1;color:var(--ink)}
+.stat .k{color:var(--mute);font-size:13px;margin-top:5px}
+.cols2{display:grid;grid-template-columns:1.3fr 1fr;gap:26px;margin-bottom:26px}
+.cols2.even{grid-template-columns:1fr 1fr}
+.panel{background:#fff;border:1px solid var(--yb);border-radius:var(--rl);padding:20px 22px;box-shadow:var(--shadow)}
+.panel h3{margin-bottom:14px}
+.panel .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px}
+.panel .hd h3{margin:0}
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--mute);font:12px 'Barlow',sans-serif}
+.chart .val{fill:var(--ink);font-weight:600}
+.mix{display:grid;gap:14px}
+.mix .r{display:grid;grid-template-columns:90px 1fr 34px;gap:10px;align-items:center}
+.mix .bar{height:12px;background:#efede4;border-radius:99px;overflow:hidden}
+.mix .bar i{display:block;height:100%;background:var(--y);border-radius:99px}
+.mix .n{text-align:right;font-weight:700}
+
+/* tables */
+.tw{overflow-x:auto;border:1px solid var(--yb);border-radius:var(--rl);background:#fff;box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:#55534b;font-weight:600;font-size:12.5px;background:var(--panel2);position:sticky;top:0}
+th.s{cursor:pointer;user-select:none}
+th.s:hover{color:var(--ink)}
+tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:#fffcec}
+td.num,th.num{text-align:right}
+td .sm2{color:var(--mute);font-size:12px;display:block}
+td a.nm{color:var(--ink);font-weight:700;text-decoration:none;background:none;border:0;padding:0;cursor:pointer;font-size:15px}
+.empty{padding:34px;text-align:center;color:var(--mute)}
+.chip{display:inline-block;padding:1px 9px;border-radius:99px;font-size:12px;font-weight:700;border:1px solid}
+.chip.active,.chip.live{color:var(--green);border-color:#b7e0c8;background:#ecf8f1}
+.chip.expiring,.chip.scheduled{color:var(--orange);border-color:#f0d3a6;background:#fff5e4}
+.chip.expired,.chip.ended{color:var(--red);border-color:#f0c4be;background:#fdeeeb}
+.chip.frozen,.chip.upcoming{color:var(--blue);border-color:#bcd2f3;background:#eef4fe}
+.chip.paused,.chip.off{color:var(--mute);border-color:#d8d6ca;background:#f4f3ee}
+
+.bar2{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.bar2 input[type=search]{flex:1;min-width:200px}
+.bar2 select{width:auto}
+.list{display:grid;gap:0}
+.li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.li:last-child{border-bottom:0}
+.li .sub{color:var(--mute);font-size:13px}
+
+/* forms */
+label{display:block;font-size:13px;color:var(--mute);margin-bottom:5px;font-weight:500}
+input,select,textarea{width:100%;background:#fff;border:1px solid #d6d4c8;color:var(--ink);padding:9px 11px;border-radius:var(--r);font:inherit;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--yb);outline:none;box-shadow:0 0 0 3px rgba(255,212,0,.35)}
+input[type=checkbox],input[type=radio]{width:auto;accent-color:#111}
+.chk{display:flex;align-items:center;gap:8px;color:var(--text);font-size:14px;margin:0}
+textarea{min-height:70px;resize:vertical}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.g1{margin-bottom:12px}
+.plansel{display:flex;gap:8px;flex-wrap:wrap}
+.sum{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin:6px 0 14px}
+.sum .l{display:flex;justify-content:space-between;padding:3px 0;color:var(--mute)}
+.sum .l b{color:var(--ink);font-weight:600}
+.sum .l.t{border-top:1px dashed #cfcdc0;margin-top:6px;padding-top:9px;color:var(--ink);font-size:17px;align-items:center}
+.sum .l.t b{color:var(--ink);font-family:'Big Shoulders Display',Impact,sans-serif;font-size:30px;font-weight:800;line-height:1.1;padding:0 4px;background:linear-gradient(transparent 58%,rgba(255,212,0,.75) 58%)}
+.hint{color:var(--mute);font-size:13px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px 18px;margin:14px 0}
+.kv div span{display:block;color:var(--mute);font-size:12px}
+.kv div b{font-size:16px;color:var(--ink)}
+
+/* offers */
+.offer{border:1px solid var(--line);border-left:4px solid #bdbbae;background:#fff;border-radius:var(--rl);padding:16px 18px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:12px;box-shadow:var(--shadow)}
+.offer.live{border-left-color:var(--y)}
+.offer.ended{border-left-color:var(--red);opacity:.7}
+.offer.paused{border-left-color:#bdbbae;opacity:.8}
+.offer.scheduled{border-left-color:var(--orange)}
+.offer .meta{color:var(--mute);font-size:13px;margin-top:4px}
+
+/* check-in */
+.ci{display:flex;gap:10px;max-width:560px;margin-bottom:18px}
+.cires{border-radius:var(--rl);padding:22px 26px;margin-bottom:22px;max-width:700px;border:2px solid;background:#fff}
+.cires.ok{border-color:var(--green);background:#f1fbf5}
+.cires.no{border-color:var(--red);background:#fff4f2}
+.cires.warn{border-color:var(--yb);background:#fffbe6}
+.cires .big{font-family:'Big Shoulders Display',Impact,sans-serif;font-weight:900;font-size:44px;text-transform:uppercase;line-height:1;color:var(--ink)}
+
+.tabs{display:flex;gap:0;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:18px}
+.tabs button{background:none;border:0;border-bottom:3px solid transparent;color:var(--mute);padding:10px 18px;font-weight:600}
+.tabs button.on{color:var(--ink);border-bottom-color:var(--y)}
+.tabs button:hover{color:var(--ink)}
+
+/* dialog */
+dialog{background:#fff;color:var(--ink);border:1px solid var(--y);border-radius:var(--rl);padding:0;width:min(560px,94vw);max-height:92vh;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.35)}
+dialog.wide{width:min(860px,95vw)}
+dialog::backdrop{background:rgba(12,12,8,.68)}
+.mi{display:flex;flex-direction:column;max-height:92vh}
+.mhd{display:flex;justify-content:space-between;align-items:center;padding:16px 22px 14px;background:var(--black);border-bottom:2px solid var(--y)}
+.mhd h2{color:#fff;font-size:24px}
+.mhd .x{background:none;border:0;color:#fff;font-size:26px;line-height:1;padding:0 4px}
+.mhd .x:hover{color:var(--y)}
+.mbody{padding:20px 22px 22px;overflow-y:auto}
+.mact{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:6px}
+
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--black);color:#fff;border:1px solid var(--y);font-weight:600;padding:11px 20px;border-radius:var(--r);z-index:9999;display:none;max-width:90vw;box-shadow:0 8px 28px rgba(0,0,0,.35)}
+#toast.err{background:#b3261e;border-color:#b3261e}
+
+#printArea{display:none}
+@media print{
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block!important;background:#fff;color:#000;padding:24px;font-family:Arial,sans-serif}
+  #printArea *{color:#000!important;background:transparent!important;border-color:#888!important}
+  #printArea table{font-size:12px}
+  #printArea th,#printArea td{padding:5px 8px;white-space:normal}
+  #printArea h1,#printArea h2,#printArea h3{font-family:Arial,sans-serif}
+  .rc{max-width:420px;margin:0 auto;border:2px solid #000;padding:18px}
+  .rc .l{display:flex;justify-content:space-between;padding:3px 0}
+}
+
+
+/* login + member portal */
+#login,#portal{display:none}
+body[data-mode=login] #login{display:flex}
+body[data-mode=member] #portal{display:block}
+body[data-mode=login] .app,body[data-mode=login] #tabbar,body[data-mode=member] .app,body[data-mode=member] #tabbar{display:none!important}
+#login{min-height:100vh;align-items:center;justify-content:center;padding:24px;background:radial-gradient(900px 520px at 15% -10%,rgba(255,212,0,.2),transparent 60%),radial-gradient(700px 400px at 100% 100%,rgba(255,255,255,.05),transparent 60%),#050505}
+.lcard{width:min(420px,100%);background:#fff;border:1px solid var(--y);border-radius:var(--rl);overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.lbrand{display:flex;align-items:center;gap:12px;background:var(--black);padding:20px 26px;border-bottom:2px solid var(--y)}
+.lbrand .nm{font-family:'Big Shoulders Display',Impact,sans-serif;font-weight:900;font-size:30px;line-height:.92;text-transform:uppercase;color:#fff}
+.lbrand .nm span{display:block}.lbrand .nm .y{color:var(--y)}
+.lbody{padding:24px 26px 26px}
+.lbody h1{font-size:30px;margin-bottom:16px}
+.pw{position:relative}
+.pw input{padding-right:64px}
+.pw button{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--mute);font-weight:600;padding:6px 8px}
+#lerr{color:var(--red);font-weight:600;min-height:24px;margin:10px 0 6px;font-size:14px}
+.lbody .btn.primary{width:100%;padding:11px;font-size:16px}
+.lbody .hint{margin-top:16px;line-height:1.5}
+.ptop{position:sticky;top:0;z-index:30;background:var(--black);border-bottom:1px solid var(--yb);display:flex;justify-content:space-between;align-items:center;gap:12px;padding:6px 24px;flex-wrap:wrap}
+.ptop .brand{padding:6px 0}
+.ptop .hi{color:#fff;font-weight:600}
+.ptop .btn{background:transparent;color:#fff;border-color:#444}
+.ptop .btn:hover{border-color:var(--y);background:rgba(255,212,0,.08)}
+.pmain{max-width:960px;margin:0 auto;padding:26px 20px 60px}
+.banner{background:#fffbe3;border:1px solid var(--yb);border-radius:var(--r);padding:12px 16px;margin-bottom:18px;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+@media (max-width:860px){.ptop{padding:6px 14px}.pmain{padding:18px 14px 50px}}
+#tabbar,.mnew{display:none}
+.moreitem{display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;color:var(--ink)}
+.moreitem b{display:block;font-size:16px}
+.moreitem span{color:var(--mute);font-size:13px}
+.moreitem:hover{border-color:var(--yb);background:#fffbe3}
+
+@media (max-width:860px){
+  .app{display:block}
+  .side{position:sticky;top:0;z-index:40;height:auto;overflow:visible;flex-direction:row;align-items:center;justify-content:space-between;padding:env(safe-area-inset-top,0px) 14px 0 0;border-right:0;border-bottom:1px solid var(--yb)}
+  .brand{padding:10px 14px}
+  .brand svg{width:32px;height:32px}
+  .brand .nm{font-size:21px}
+  .hazard,.nav,.side .foot{display:none}
+  .mnew{display:inline-block}
+  #tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--black);border-top:1px solid var(--yb);padding-bottom:env(safe-area-inset-bottom,0px)}
+  #tabbar button{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:0;color:#a9a79d;font-size:11px;font-weight:600;padding:9px 2px 8px;min-height:56px}
+  #tabbar button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  #tabbar button.on{color:var(--y);box-shadow:inset 0 2px 0 var(--y)}
+  #tabbar .bd{position:absolute;top:4px;left:calc(50% + 6px);background:#ff5a47;color:#000;border-radius:99px;font-size:10px;font-weight:700;padding:0 5px;min-width:16px;text-align:center;line-height:16px}
+  .main{padding:18px 14px calc(88px + env(safe-area-inset-bottom,0px))}
+  .top{margin-bottom:16px}
+  .top>.row{display:none}
+  h1{font-size:30px}
+  .cols2,.cols2.even{grid-template-columns:1fr;gap:16px;margin-bottom:16px}
+  .g2{grid-template-columns:1fr}
+  .hero{padding:20px 18px 18px}
+  .hero .side2{text-align:left}
+  .stats{grid-template-columns:1fr 1fr;margin:16px 0 20px}
+  .stat{padding:14px 16px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .stat:nth-child(2n){border-right:0}
+  .stat:last-child{border-bottom:0;border-right:0}
+  .stat:nth-last-child(2):nth-child(odd){border-bottom:0}
+  .stat .v{font-size:28px}
+  .panel{padding:16px}
+  .bar2{gap:8px}
+  .bar2 input[type=search]{flex:1 1 100%}
+  .bar2 select{flex:1 1 calc(50% - 4px)}
+  .tabs{flex-wrap:nowrap;overflow-x:auto;margin-left:-14px;margin-right:-14px;padding:0 14px}
+  .tabs button{white-space:nowrap}
+  .ci{max-width:none}
+  .cires .big{font-size:32px}
+  input,select,textarea{font-size:16px}
+  .btn{min-height:40px}
+  .btn.sm{min-height:36px;padding:6px 12px}
+  .li{align-items:flex-start}
+  dialog,dialog.wide{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:16px 16px 0 0;max-height:92vh}
+  .mi{max-height:92vh}
+  .mhd{padding:14px 16px 12px}
+  .mbody{padding:16px 16px calc(20px + env(safe-area-inset-bottom,0px))}
+  .mact .btn{flex:1 1 auto}
+  #toast{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  /* tables become cards */
+  .rt thead{display:none}
+  .rt,.rt tbody{display:block}
+  .rt tr{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;padding:14px;border-bottom:1px solid var(--line)}
+  .rt tr:last-child{border-bottom:0}
+  .rt td{display:block;padding:0;border:0;white-space:normal;text-align:left!important;min-width:0}
+  .rt td[data-l]::before{content:attr(data-l);display:block;color:var(--mute);font-size:12px;margin-bottom:1px}
+  .rt td.h{order:-1;grid-column:1/-1;font-size:17px}
+  .rt td.act{grid-column:1/-1;padding-top:2px}
+  .rt tbody tr:hover td{background:none}
+  .tw{overflow:visible}
+}
+@media (max-width:380px){
+  .brand .nm{font-size:18px}
+  #tabbar button{font-size:10px}
+}
+
+/* motion + premium effects (transform/opacity only) */
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes growY{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes growX{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes lift{0%,100%{transform:translateY(0)}45%,55%{transform:translateY(-14px)}}
+@keyframes shadow{0%,100%{transform:scaleX(1);opacity:.55}45%,55%{transform:scaleX(.7);opacity:.25}}
+@keyframes rep{0%,100%{transform:translateY(6px)}40%{transform:translateY(-10px)}70%{transform:translateY(6px)}}
+@keyframes sweep{from{transform:translateX(-120%) skewX(-18deg)}to{transform:translateX(520%) skewX(-18deg)}}
+@keyframes sheet{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+@keyframes pop{from{transform:scale(.96);opacity:0}to{transform:none;opacity:1}}
+@keyframes toastIn{from{transform:translate(-50%,12px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+@keyframes splashOut{to{opacity:0;visibility:hidden}}
+.db{display:block;margin:0 auto;overflow:visible;color:#d9d7cb}
+.cires .db{color:var(--ink)}
+.dbwrap{display:inline-block;text-align:center}
+.dbshadow{width:56%;height:6px;margin:8px auto 0;background:radial-gradient(closest-side,rgba(255,212,0,.4),transparent);border-radius:50%}
+.db.lift{animation:lift 2.4s ease-in-out infinite}
+.db.lift+.dbshadow{animation:shadow 2.4s ease-in-out infinite}
+.db.rep{animation:rep .7s ease-in-out 2}
+.btn{transition:border-color .15s,background .15s,box-shadow .15s,transform .1s}
+.btn:active{transform:scale(.97)}
+.btn.primary{position:relative;overflow:hidden}
+@media (hover:hover){
+  .btn.primary::after{content:"";position:absolute;top:0;bottom:0;left:0;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.3),transparent);transform:translateX(-140%) skewX(-18deg);transition:transform .6s}
+  .btn.primary:hover::after{transform:translateX(320%) skewX(-18deg)}
+}
+.hero::before{content:"";position:absolute;top:0;bottom:0;left:0;width:18%;background:linear-gradient(100deg,transparent,rgba(255,236,160,.16),transparent);pointer-events:none;transform:translateX(-120%) skewX(-18deg)}
+body.anim .hero::before{animation:sweep 1.7s ease .35s 1 both}
+body.anim #main>*,body.anim #portal .pmain>*{animation:rise .32s cubic-bezier(.2,.8,.2,1) both}
+body.anim #main>*:nth-child(2),body.anim #portal .pmain>*:nth-child(2){animation-delay:.05s}
+body.anim #main>*:nth-child(3),body.anim #portal .pmain>*:nth-child(3){animation-delay:.1s}
+body.anim #main>*:nth-child(4),body.anim #portal .pmain>*:nth-child(4){animation-delay:.15s}
+body.anim #main>*:nth-child(5),body.anim #portal .pmain>*:nth-child(5){animation-delay:.2s}
+body.anim .chart .bar{transform-box:fill-box;transform-origin:bottom;animation:growY .7s cubic-bezier(.2,.8,.2,1) both}
+body.anim .mix .bar i{transform-origin:left;animation:growX .8s cubic-bezier(.2,.8,.2,1) both}
+dialog[open]{animation:pop .22s cubic-bezier(.2,.8,.2,1)}
+#toast{animation:toastIn .25s ease}
+.empty::before{content:"";display:block;width:72px;height:30px;margin:0 auto 12px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 50'%3E%3Crect x='22' y='22.5' width='76' height='5' rx='2.5' fill='%239b9b92'/%3E%3Cg fill='%23ffd400' stroke='%23111' stroke-width='1.5'%3E%3Crect x='22' y='6' width='9' height='38' rx='3'/%3E%3Crect x='12' y='12' width='8' height='26' rx='3'/%3E%3Crect x='89' y='6' width='9' height='38' rx='3'/%3E%3Crect x='100' y='12' width='8' height='26' rx='3'/%3E%3C/g%3E%3Cg fill='%239b9b92'%3E%3Crect x='6' y='18' width='5' height='14' rx='2'/%3E%3Crect x='109' y='18' width='5' height='14' rx='2'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat}
+#splash{position:fixed;inset:0;z-index:9998;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:radial-gradient(600px 380px at 50% 40%,rgba(255,212,0,.16),transparent 70%),#050505;color:#d9d7cb;animation:splashOut .35s ease 1.25s forwards}
+#splash .db.rep{animation-iteration-count:3}
+#splash .nm{font-family:'Big Shoulders Display',Impact,sans-serif;font-weight:900;font-size:34px;line-height:.95;text-transform:uppercase;color:#fff;text-align:center;animation:rise .5s ease .15s both}
+#splash .nm span{display:block}#splash .nm .y{color:var(--y)}
+@media (max-width:860px){dialog[open]{animation:sheet .28s cubic-bezier(.2,.8,.2,1)}}
+.lite *,.lite *::before,.lite *::after{animation:none!important;transition:none!important}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <svg width="40" height="40" viewBox="0 0 32 32" aria-hidden="true"><polygon points="16,2 28,9 28,23 16,30 4,23 4,9" fill="none" stroke="#ffd400" stroke-width="1.6" stroke-linejoin="round"/><circle cx="16" cy="16" r="5.5" fill="none" stroke="#ffd400" stroke-width="1.6"/></svg>
+      <div class="nm" id="brandName"></div>
+    </div>
+    <button class="btn primary mnew" data-act="newMember">+ New member</button>
+    <div class="hazard"></div>
+    <nav class="nav" id="nav" aria-label="Main"></nav>
+    <div class="foot"><button class="btn sm" data-act="logout" style="width:100%;margin-bottom:10px;background:transparent;color:#fff;border-color:#3a3a3a">Log out</button>Demo data is stored in this browser only.</div>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+
+<div id="login">
+  <div class="lcard">
+    <div class="lbrand">
+      <svg width="40" height="40" viewBox="0 0 32 32" aria-hidden="true"><polygon points="16,2 28,9 28,23 16,30 4,23 4,9" fill="none" stroke="#ffd400" stroke-width="1.6" stroke-linejoin="round"/><circle cx="16" cy="16" r="5" fill="none" stroke="#ffd400" stroke-width="1.6"/></svg>
+      <div class="nm" id="lbrandName"></div>
+    </div>
+    <div class="lbody">
+      <div style="text-align:center;margin:-4px 0 14px"><div id="ldb" class="dbwrap"></div></div>
+      <h1>Sign in</h1>
+      <form id="lform" autocomplete="on">
+        <div class="g1"><label for="lu">Username</label><input id="lu" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Admin username or your phone number"></div>
+        <div class="g1"><label for="lp">Password</label><div class="pw"><input id="lp" name="password" type="password" autocomplete="current-password"><button type="button" id="lshow">Show</button></div></div>
+        <div id="lerr" role="alert"></div>
+        <button class="btn primary" type="submit">Sign in</button>
+      </form>
+      <div class="hint">Members: your username is the phone number you registered with. First time? Your password is the first 3 letters of your name followed by the last 4 digits of your phone number. Change it after you sign in.</div>
+    </div>
+  </div>
+</div>
+<div id="portal"></div>
+
+<nav id="tabbar" aria-label="Main"></nav>
+
+<dialog id="modal">
+  <div class="mi">
+    <div class="mhd"><h2 id="modalTitle"></h2><button class="x" data-act="closeModal" aria-label="Close">&times;</button></div>
+    <div class="mbody" id="modalBody"></div>
+  </div>
+</dialog>
+<div id="toast" role="status"></div>
+<div id="printArea"></div>
+<input type="file" id="importFile" accept="application/json" hidden>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- helpers ---------- */
+const KEY='muscle-mechanic-v1';
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=p=>p+Math.random().toString(36).slice(2,8);
+const pad=n=>String(n).padStart(2,'0');
+const fmtISO=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parseISO=s=>{const a=s.split('-').map(Number);return new Date(a[0],a[1]-1,a[2]);};
+const todayISO=()=>fmtISO(new Date());
+const nowTime=()=>{const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes());};
+const addDays=(s,n)=>{const d=parseISO(s);d.setDate(d.getDate()+n);return fmtISO(d);};
+const addMonths=(s,n)=>{const d=parseISO(s);const day=d.getDate();d.setDate(1);d.setMonth(d.getMonth()+n);const last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();d.setDate(Math.min(day,last));return fmtISO(d);};
+const diffDays=(a,b)=>Math.round((parseISO(a)-parseISO(b))/86400000);
+const fmtDate=s=>s?parseISO(s).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'–';
+const money=n=>'₹'+Math.round(Number(n)||0).toLocaleString('en-IN');
+const monthLabel=k=>{const a=k.split('-');return new Date(+a[0],+a[1]-1,1).toLocaleDateString('en-IN',{month:'short'});};
+const g=id=>document.getElementById(id);
+const digits=s=>String(s||'').replace(/\D/g,'');
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+/* ---------- seed data ---------- */
+function seed(){
+  const rnd=mulberry32(2026), t=todayISO();
+  const plans=[
+    {id:'p1',name:'1 Month',months:1,price:700,active:true},
+    {id:'p3',name:'3 Months',months:3,price:2100,active:true},
+    {id:'p6',name:'6 Months',months:6,price:4200,active:true},
+    {id:'p12',name:'1 Year',months:12,price:8400,active:true}
+  ];
+  const offers=[
+    {id:'o1',name:'Festive 15% off',desc:'Seasonal offer on long plans',type:'percent',value:15,plans:['p6','p12'],audience:'both',from:addDays(t,-5),to:addDays(t,20),active:true},
+    {id:'o2',name:'Zero admission week',desc:'Admission fee waived for new joiners',type:'admission',value:0,plans:[],audience:'new',from:addDays(t,-2),to:addDays(t,5),active:true},
+    {id:'o3',name:'Refer a friend: 15 bonus days',desc:'Added on top of the 3 month plan',type:'freedays',value:15,plans:['p3'],audience:'both',from:addDays(t,-30),to:addDays(t,60),active:true},
+    {id:'o4',name:'Summer flat ₹300 off',desc:'Ended summer campaign',type:'flat',value:300,plans:['p3','p6'],audience:'both',from:addDays(t,-150),to:addDays(t,-90),active:true}
+  ];
+  const names=['Arjun Ramesh','Karthik Subramanian','Vignesh Kumar','Suresh Babu','Priya Natarajan','Divya Lakshmi','Mohammed Irfan','Santhosh Raj','Naveen Prakash','Deepak Chandran','Ananya Krishnan','Rahul Venkat','Harish Anand','Lokesh Murugan','Sneha Iyer','Vijay Anand','Gokul Raj','Praveen Kumar','Aravind Selvam','Bharath Narayanan','Kavya Menon','Manoj Kumar','Sathish Kannan','Yuvaraj S','Nithya Shree','Dinesh Karthik','Ashwin Raghavan','Pooja Srinivasan','Tamilselvan R','Faizal Ahmed','Jayanth Gopal','Abishek Raja','Meera Sundaram','Rohit Varma'];
+  const female=['Priya','Divya','Ananya','Sneha','Kavya','Nithya','Pooja','Meera'];
+  const modes=['Cash','UPI','UPI','Card'];
+  const members=[],payments=[],attendance=[];
+  let rc=1001;
+  names.forEach((n,i)=>{
+    const r=rnd();
+    const plan=r<.35?plans[0]:r<.6?plans[1]:r<.82?plans[2]:plans[3];
+    const back=Math.floor(rnd()*(plan.months*30+25));
+    const start=addDays(t,-back);
+    const end=addDays(addMonths(start,plan.months),-1);
+    const id='MM'+(1001+i);
+    const first=n.split(' ')[0];
+    const repeat=plan.months<=3&&rnd()<.45;
+    let joined=start;
+    if(repeat){
+      joined=addMonths(start,-plan.months);
+      const pe=addDays(addMonths(joined,plan.months),-1);
+      payments.push({id:uid('pay'),rc:'',memberId:id,date:joined,kind:'New',planId:plan.id,planName:plan.name,months:plan.months,planPrice:plan.price,admission:1200,discount:0,total:plan.price+1200,paid:plan.price+1200,mode:modes[Math.floor(rnd()*4)],offer:'',offerId:'',start:joined,end:pe});
+    }
+    const disc=rnd()<.2?Math.round(plan.price*.1):0;
+    const adm=repeat?0:1200;
+    const total=plan.price+adm-disc;
+    const paid=rnd()<.08?total-Math.round(total*.3/50)*50:total;
+    payments.push({id:uid('pay'),rc:'',memberId:id,date:start,kind:repeat?'Renewal':'New',planId:plan.id,planName:plan.name,months:plan.months,planPrice:plan.price,admission:adm,discount:disc,total:total,paid:paid,mode:modes[Math.floor(rnd()*4)],offer:disc?'Referral discount':'',offerId:'',start:start,end:end});
+    members.push({id:id,name:n,phone:'9'+String(Math.floor(rnd()*1e9)).padStart(9,'0'),email:rnd()<.6?n.toLowerCase().replace(/ /g,'.')+'@example.com':'',gender:female.includes(first)?'Female':'Male',joined:joined,planId:plan.id,start:start,end:end,notes:'',frozenUntil:null});
+    if(end>=t){for(let d=0;d<14;d++){if(rnd()<.42)attendance.push({memberId:id,date:addDays(t,-d),time:pad(5+Math.floor(rnd()*15))+':'+pad(Math.floor(rnd()*60))});}}
+  });
+  payments.sort((a,b)=>a.date<b.date?-1:1).forEach(p=>{p.rc='RC'+(rc++);});
+  return {
+    settings:{gymName:'MUSCLE MECHANIC',admissionFee:1200,warnDays:7,countryCode:'91',
+      msgExpiring:'Hi {name}, this is {gym}. Your {plan} membership ends on {end} ({days} days left). Renew now and keep the streak going!',
+      msgExpired:'Hi {name}, your {gym} membership expired on {end}. Come back and renew. Ask at the desk about current offers.',
+      msgDue:'Hi {name}, a balance of {due} is pending at {gym}. Please clear it on your next visit. Thank you!'},
+    plans,offers,members,payments,attendance
+  };
+}
+function load(){try{const r=localStorage.getItem(KEY);if(r){const d=JSON.parse(r);if(d&&d.members&&d.plans&&d.settings)return d;}}catch(e){}return seed();}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){}}
+
+let DB=load();
+const UI={view:'dashboard',q:'',fStatus:'all',fPlan:'all',sort:'end',dir:1,rep:'collections',range:'month',from:'',to:'',lastCheck:null};
+
+
+/* ---------- motion helpers ---------- */
+const FXKEY='mm-fx';
+const fxMode=()=>{try{return localStorage.getItem(FXKEY)||'auto';}catch(e){return 'auto';}};
+function isLite(){
+  const m=fxMode();if(m==='off')return true;if(m==='on')return false;
+  const rm=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const save=!!(navigator.connection&&navigator.connection.saveData);
+  return rm||save||(navigator.deviceMemory||8)<=2||(navigator.hardwareConcurrency||8)<=2;
+}
+function applyFx(){document.body.classList.toggle('lite',isLite());}
+const DUMBBELL=(w,cls)=>'<svg class="db '+(cls||'')+'" width="'+w+'" height="'+Math.round(w*.4167)+'" viewBox="0 0 120 50" aria-hidden="true"><rect x="22" y="22.5" width="76" height="5" rx="2.5" fill="currentColor"/><g fill="#ffd400" stroke="#111" stroke-width="1.5"><rect x="22" y="6" width="9" height="38" rx="3"/><rect x="12" y="12" width="8" height="26" rx="3"/><rect x="89" y="6" width="9" height="38" rx="3"/><rect x="100" y="12" width="8" height="26" rx="3"/></g><g fill="currentColor"><rect x="6" y="18" width="5" height="14" rx="2"/><rect x="109" y="18" width="5" height="14" rx="2"/></g></svg>';
+function countUp(el,ms){
+  const to=parseInt(el.textContent,10);if(!(to>0))return;
+  const t0=performance.now(),dur=ms||700;
+  (function step(t){const k=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-k,3);el.textContent=Math.round(to*e);if(k<1)requestAnimationFrame(step);})(t0);
+}
+function showSplash(){
+  if(document.body.classList.contains('lite'))return;
+  const sp=document.createElement('div');sp.id='splash';
+  sp.innerHTML='<div class="dbwrap">'+DUMBBELL(130,'rep')+'<div class="dbshadow"></div></div><div class="nm">'+brandHTML()+'</div>';
+  document.body.appendChild(sp);setTimeout(()=>sp.remove(),1700);
+}
+applyFx();
+
+/* ---------- auth ---------- */
+const ADMIN0={salt:'mm-salt-9c41e7',hash:'077060bf2350039df2547e2c7a13689ac8d9e13c83406dbf30322e07ea80888b'};
+const sha256=(function(){
+  const K=[],H0=[];
+  (function(){let n=2,c=0;while(c<64){let pr=true;for(let i=2;i*i<=n;i++)if(n%i===0){pr=false;break;}if(pr){if(c<8)H0.push((Math.pow(n,.5)%1)*4294967296|0);K.push((Math.pow(n,1/3)%1)*4294967296|0);c++;}n++;}})();
+  return function(msg){
+    const b=Array.from(new TextEncoder().encode(msg)),bits=b.length*8;
+    b.push(0x80);while(b.length%64!==56)b.push(0);
+    b.push(0,0,0,0,(bits>>>24)&255,(bits>>>16)&255,(bits>>>8)&255,bits&255);
+    const h=H0.slice(),w=new Array(64);
+    for(let o=0;o<b.length;o+=64){
+      for(let i=0;i<16;i++)w[i]=(b[o+i*4]<<24)|(b[o+i*4+1]<<16)|(b[o+i*4+2]<<8)|b[o+i*4+3];
+      for(let i=16;i<64;i++){const x=w[i-15],y=w[i-2];const s0=((x>>>7)|(x<<25))^((x>>>18)|(x<<14))^(x>>>3);const s1=((y>>>17)|(y<<15))^((y>>>19)|(y<<13))^(y>>>10);w[i]=(w[i-16]+s0+w[i-7]+s1)|0;}
+      let a=h[0],bb=h[1],c=h[2],d=h[3],e=h[4],f=h[5],gg=h[6],hh=h[7];
+      for(let i=0;i<64;i++){
+        const S1=((e>>>6)|(e<<26))^((e>>>11)|(e<<21))^((e>>>25)|(e<<7));const ch=(e&f)^(~e&gg);const t1=(hh+S1+ch+K[i]+w[i])|0;
+        const S0=((a>>>2)|(a<<30))^((a>>>13)|(a<<19))^((a>>>22)|(a<<10));const mj=(a&bb)^(a&c)^(bb&c);const t2=(S0+mj)|0;
+        hh=gg;gg=f;f=e;e=(d+t1)|0;d=c;c=bb;bb=a;a=(t1+t2)|0;
+      }
+      h[0]=(h[0]+a)|0;h[1]=(h[1]+bb)|0;h[2]=(h[2]+c)|0;h[3]=(h[3]+d)|0;h[4]=(h[4]+e)|0;h[5]=(h[5]+f)|0;h[6]=(h[6]+gg)|0;h[7]=(h[7]+hh)|0;
+    }
+    return h.map(x=>('00000000'+(x>>>0).toString(16)).slice(-8)).join('');
+  };
+})();
+const adminAuth=()=>DB.settings.adminAuth||ADMIN0;
+const rndSalt=()=>{try{const a=new Uint8Array(8);crypto.getRandomValues(a);return Array.from(a,x=>x.toString(16).padStart(2,'0')).join('');}catch(e){return Math.random().toString(36).slice(2,12);}};
+const adminHash=(salt,pw)=>sha256(salt+':admin:'+pw);
+const memberHash=(salt,id,pw)=>sha256(salt+':'+id+':'+pw);
+function defaultPw(m){return m.name.replace(/[^A-Za-z]/g,'').slice(0,3).toLowerCase()+digits(m.phone).slice(-4);}
+function memberPwOk(m,pw){return m.auth?memberHash(m.auth.salt,m.id,pw)===m.auth.hash:String(pw).trim().toLowerCase()===defaultPw(m);}
+function findByLogin(u){const d=digits(u).slice(-10);return d.length===10?DB.members.find(x=>x.phone===d):null;}
+let SESSION=null;
+try{SESSION=JSON.parse(sessionStorage.getItem('mm-session'));}catch(e){}
+function setSession(x){SESSION=x;try{x?sessionStorage.setItem('mm-session',JSON.stringify(x)):sessionStorage.removeItem('mm-session');}catch(e){}}
+if(SESSION&&SESSION.role==='member'&&!memberById(SESSION.id))SESSION=null;
+if(SESSION&&SESSION.role!=='member'&&SESSION.role!=='admin')SESSION=null;
+const MEMBER_OK=['logout','memberPw','savePw','receipt','closeModal'];
+
+function brandHTML(){const nm=DB.settings.gymName.trim().split(/\s+/),first=nm.shift();return '<span>'+esc(first)+'</span>'+(nm.length?'<span class="y">'+esc(nm.join(' '))+'</span>':'');}
+function render(){
+  applyFx();
+  document.body.dataset.mode=!SESSION?'login':SESSION.role;
+  if(!SESSION){
+    g('lbrandName').innerHTML=brandHTML();g('ldb').innerHTML=DUMBBELL(104,'lift')+'<div class="dbshadow"></div>';document.title='Sign in – '+DB.settings.gymName;
+    g('lerr').textContent='';setTimeout(()=>{const u=g('lu');if(u&&document.body.dataset.mode==='login')u.focus();},30);return;
+  }
+  if(SESSION.role==='member'){renderPortal();return;}
+  renderAdmin();
+}
+function renderPortal(){
+  const m=memberById(SESSION.id);
+  if(!m){setSession(null);render();return;}
+  document.body.classList.toggle('anim',UI._last!=='portal');UI._last='portal';
+  document.title=DB.settings.gymName+' – My membership';
+  const t=todayISO(),s=status(m),dl=diffDays(m.end,t),due=dueOf(m.id);
+  const pays=DB.payments.filter(p=>p.memberId===m.id).sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:(a.rc<b.rc?1:-1));
+  const att=DB.attendance.filter(a=>a.memberId===m.id).sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:(a.time<b.time?1:-1));
+  const last30=att.filter(a=>diffDays(t,a.date)<=30).length;
+  const live=DB.offers.filter(o=>offerState(o)==='Live');
+  let lbl='Days left on your membership',big=Math.max(0,dl),sub='Valid till '+fmtDate(m.end);
+  if(s==='Expired'){lbl='Your membership has expired';big=0;sub='Expired on '+fmtDate(m.end);}
+  else if(s==='Frozen'){lbl='Membership frozen until '+fmtDate(m.frozenUntil);big=Math.max(0,dl);sub='Days left after you resume';}
+  else if(s==='Upcoming'){lbl='Your membership starts in';big=Math.max(0,diffDays(m.start,t));sub='Starts on '+fmtDate(m.start)+' (days)';}
+  g('portal').innerHTML=
+   '<div class="ptop"><div class="brand"><svg width="34" height="34" viewBox="0 0 32 32" aria-hidden="true"><polygon points="16,2 28,9 28,23 16,30 4,23 4,9" fill="none" stroke="#ffd400" stroke-width="1.6" stroke-linejoin="round"/><circle cx="16" cy="16" r="5" fill="none" stroke="#ffd400" stroke-width="1.6"/></svg><div class="nm">'+brandHTML()+'</div></div><div class="row"><span class="hi">Hi, '+esc(m.name.split(' ')[0])+'</span><button class="btn sm" data-act="memberPw">Change password</button><button class="btn sm" data-act="logout">Log out</button></div></div>'+
+   '<div class="pmain">'+
+   (m.auth?'':'<div class="banner"><span>You are using your default password. Set a new one to keep your account private.</span><button class="btn primary sm" data-act="memberPw">Change password</button></div>')+
+   '<div class="hero"><div><div class="lbl">'+esc(lbl)+'</div><div class="big">'+big+'</div></div><div class="side2"><b>'+esc(planName(m.planId))+'</b><br>'+esc(sub)+'<br>'+chip(s)+'</div></div>'+
+   '<div class="panel" style="margin:20px 0"><h3>My membership</h3><div class="kv"><div><span>Member ID</span><b>'+esc(m.id)+'</b></div><div><span>Plan</span><b>'+esc(planName(m.planId))+'</b></div><div><span>Current period</span><b>'+fmtDate(m.start)+' to '+fmtDate(m.end)+'</b></div><div><span>Member since</span><b>'+fmtDate(m.joined)+'</b></div><div><span>Visits in last 30 days</span><b>'+last30+'</b></div><div><span>Pending due</span><b style="color:'+(due>0?'var(--orange)':'inherit')+'">'+money(due)+'</b></div></div>'+
+   (s==='Expired'||s==='Expiring'?'<div class="hint">To renew, visit the front desk or call the gym.</div>':'')+'</div>'+
+   (live.length?'<div class="panel" style="margin-bottom:20px"><h3>Current offers</h3>'+live.map(o=>'<div class="li"><div><b>'+esc(o.name)+'</b><div class="sub">'+esc(offerText(o))+' · until '+fmtDate(o.to)+'</div></div></div>').join('')+'</div>':'')+
+   '<div class="panel" style="margin-bottom:20px"><h3>My payments</h3>'+(pays.length?'<div class="tw" style="box-shadow:none"><table class="rt"><thead><tr><th>Date</th><th>Receipt</th><th>Type</th><th>Plan</th><th class="num">Paid</th><th></th></tr></thead><tbody>'+pays.map(p=>'<tr><td data-l="Date">'+fmtDate(p.date)+'</td><td data-l="Receipt">'+esc(p.rc)+'</td><td data-l="Type">'+esc(p.kind)+'</td><td data-l="Plan">'+esc(p.planName)+'</td><td class="num" data-l="Paid">'+money(p.paid)+'</td><td class="act"><button class="btn sm" data-act="receipt" data-id="'+p.id+'">Receipt</button></td></tr>').join('')+'</tbody></table></div>':'<div class="empty">No payments yet.</div>')+'</div>'+
+   '<div class="panel"><h3>Recent visits</h3>'+(att.length?att.slice(0,8).map(a=>'<div class="li"><span>'+fmtDate(a.date)+'</span><span class="hint">'+esc(a.time)+'</span></div>').join(''):'<div class="empty">No visits recorded yet.</div>')+'</div>'+
+   '</div>';
+}
+function openPw(admin){
+  openModal('Change password',
+   '<div class="g1"><label for="pw-cur">Current password</label><input type="password" id="pw-cur" autocomplete="current-password"></div>'+
+   '<div class="g2"><div><label for="pw-new">New password</label><input type="password" id="pw-new" autocomplete="new-password"></div><div><label for="pw-new2">Confirm new password</label><input type="password" id="pw-new2" autocomplete="new-password"></div></div>'+
+   '<div class="hint" style="margin-bottom:12px">Use at least '+(admin?8:6)+' characters.</div>'+
+   '<div class="mact"><button class="btn" data-act="closeModal">Cancel</button><button class="btn primary" data-act="'+(admin?'saveAdminPw':'savePw')+'">Save password</button></div>');
+}
+function pwFields(min){
+  const cur=g('pw-cur').value,n1=g('pw-new').value,n2=g('pw-new2').value;
+  if(n1.length<min){toast('New password needs at least '+min+' characters','err');return null;}
+  if(n1!==n2){toast('The two new passwords do not match','err');return null;}
+  return {cur:cur,n:n1};
+}
+(function wireLogin(){
+  let fails=0,lock=0;
+  const err=m=>{g('lerr').textContent=m;};
+  g('lshow').addEventListener('click',()=>{const i=g('lp'),on=i.type==='password';i.type=on?'text':'password';g('lshow').textContent=on?'Hide':'Show';});
+  g('lform').addEventListener('submit',e=>{
+    e.preventDefault();
+    const now=Date.now();
+    if(now<lock){err('Too many attempts. Try again in '+Math.ceil((lock-now)/1000)+' seconds.');return;}
+    const u=g('lu').value.trim(),p=g('lp').value;
+    if(!u||!p){err('Enter your username and password.');return;}
+    let sess=null;
+    if(u.toLowerCase()==='admin'){const a=adminAuth();if(adminHash(a.salt,p)===a.hash)sess={role:'admin'};}
+    else{const m=findByLogin(u);if(m&&memberPwOk(m,p))sess={role:'member',id:m.id};}
+    if(!sess){fails++;if(fails>=5){lock=now+30000;fails=0;err('Too many attempts. Locked for 30 seconds.');}else err('Wrong username or password.');g('lp').value='';return;}
+    fails=0;g('lp').value='';g('lp').type='password';g('lshow').textContent='Show';setSession(sess);UI._last=null;render();window.scrollTo(0,0);showSplash();
+  });
+})();
+
+/* ---------- domain ---------- */
+const planById=id=>DB.plans.find(p=>p.id===id);
+const planName=id=>{const p=planById(id);return p?p.name:'–';};
+function status(m){
+  const t=todayISO();
+  if(m.frozenUntil&&t<=m.frozenUntil)return 'Frozen';
+  if(m.start>t)return 'Upcoming';
+  if(m.end<t)return 'Expired';
+  if(diffDays(m.end,t)<=DB.settings.warnDays)return 'Expiring';
+  return 'Active';
+}
+const isLive=s=>s==='Active'||s==='Expiring'||s==='Frozen';
+const dueOf=id=>DB.payments.filter(p=>p.memberId===id).reduce((a,p)=>a+(p.total-p.paid),0);
+const memberById=id=>DB.members.find(m=>m.id===id);
+function nextMemberId(){const n=DB.members.reduce((a,m)=>Math.max(a,parseInt(m.id.replace(/\D/g,''),10)||0),1000);return 'MM'+(n+1);}
+function nextRc(){const n=DB.payments.reduce((a,p)=>Math.max(a,parseInt(String(p.rc).replace(/\D/g,''),10)||0),1000);return 'RC'+(n+1);}
+function offerState(o){const t=todayISO();if(!o.active)return 'Paused';if(t<o.from)return 'Scheduled';if(t>o.to)return 'Ended';return 'Live';}
+function offerApplies(o,planId,isNew){return offerState(o)==='Live'&&(!o.plans.length||o.plans.includes(planId))&&(o.audience==='both'||(o.audience==='new')===isNew);}
+function offerText(o){
+  const v={percent:o.value+'% off the plan fee',flat:money(o.value)+' off the plan fee',admission:'Admission fee waived',freedays:o.value+' bonus days added'}[o.type];
+  return v;
+}
+function quote(plan,offer,isNew,flag,extra){
+  const base=plan.price;
+  let adm=isNew?(flag?0:DB.settings.admissionFee):(flag?DB.settings.admissionFee:0);
+  let disc=0,bonus=0;
+  if(offer){
+    if(offer.type==='percent')disc=Math.round(base*offer.value/100);
+    else if(offer.type==='flat')disc=Math.min(base,offer.value);
+    else if(offer.type==='admission')adm=0;
+    else if(offer.type==='freedays')bonus=Number(offer.value)||0;
+  }
+  extra=Math.max(0,Number(extra)||0);
+  return {base,adm,disc,extra,bonus,total:Math.max(0,base+adm-disc-extra)};
+}
+function fillMsg(tpl,m,extra){
+  const end=m?fmtDate(m.end):'';
+  const days=m?diffDays(m.end,todayISO()):0;
+  return String(tpl).replace(/\{(\w+)\}/g,(x,k)=>{
+    const map={name:m?m.name.split(' ')[0]:'',gym:DB.settings.gymName,end:end,days:days,plan:m?planName(m.planId):'',due:m?money(dueOf(m.id)):''};
+    return k in map?map[k]:x;
+  });
+}
+function waLink(m,tpl){
+  let p=digits(m.phone);if(p.length===10)p=DB.settings.countryCode+p;
+  return 'https://wa.me/'+p+'?text='+encodeURIComponent(fillMsg(tpl,m));
+}
+const chip=(s)=>'<span class="chip '+String(s).toLowerCase()+'">'+esc(s)+'</span>';
+
+/* ---------- ui primitives ---------- */
+const dlg=g('modal');
+function openModal(title,body,wide){
+  g('modalTitle').textContent=title;
+  const b=g('modalBody');b.innerHTML=body;b.oninput=null;b.onchange=null;
+  dlg.classList.toggle('wide',!!wide);
+  if(!dlg.open)dlg.showModal();
+}
+function closeModal(){if(dlg.open)dlg.close();}
+dlg.addEventListener('click',e=>{if(e.target===dlg)closeModal();});
+let toastT;
+function toast(msg,kind){const t=g('toast');t.textContent=msg;t.className=kind==='err'?'err':'';t.style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>{t.style.display='none';},2800);}
+function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:type||'text/plain'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},300);}
+function csv(cols,rows){
+  const q=v=>{v=v==null?'':String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+  return [cols.map(q).join(',')].concat(rows.map(r=>r.map(c=>q(c&&typeof c==='object'?(c.v!=null?c.v:c.t):c)).join(','))).join('\n');
+}
+function printHTML(html){g('printArea').innerHTML=html;setTimeout(()=>window.print(),50);}
+const mc=n=>({t:money(n),v:Math.round(n)});
+
+/* ---------- views ---------- */
+const NAV=[['dashboard','Dashboard'],['members','Members'],['checkin','Check-in'],['reminders','Reminders'],['plans','Plans and fees'],['offers','Offers'],['reports','Reports'],['settings','Settings and data']];
+const TITLES={dashboard:'Dashboard',members:'Members',checkin:'Check-in',reminders:'Reminders',plans:'Plans and fees',offers:'Offers',reports:'Reports',settings:'Settings and data'};
+
+function head(sub){
+  return '<div class="top"><div><h1>'+TITLES[UI.view]+'</h1><div class="sub">'+esc(sub||new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'}))+'</div></div><div class="row"><button class="btn primary" data-act="newMember">+ New member</button></div></div>';
+}
+
+function dashboard(){
+  const t=todayISO(),rows=DB.members.map(m=>({m:m,s:status(m)}));
+  const cnt=s=>rows.filter(r=>r.s===s).length;
+  const active=cnt('Active')+cnt('Expiring');
+  const mk=t.slice(0,7);
+  const coll=DB.payments.filter(p=>p.date.slice(0,7)===mk).reduce((a,p)=>a+p.paid,0);
+  const joins=DB.members.filter(m=>m.joined.slice(0,7)===mk).length;
+  const dues=DB.members.reduce((a,m)=>a+Math.max(0,dueOf(m.id)),0);
+  const today=DB.attendance.filter(a=>a.date===t).length;
+  // chart
+  const now=new Date(),keys=[];
+  for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);keys.push(d.getFullYear()+'-'+pad(d.getMonth()+1));}
+  const vals=keys.map(k=>DB.payments.filter(p=>p.date.slice(0,7)===k).reduce((a,p)=>a+p.paid,0));
+  const mx=Math.max.apply(null,vals.concat([1]));
+  let bars='';
+  vals.forEach((v,i)=>{const h=Math.round(v/mx*150),x=30+i*88;bars+='<rect class="bar" style="animation-delay:'+(i*70)+'ms" x="'+x+'" y="'+(180-h)+'" width="44" height="'+h+'" rx="4" fill="'+(i===5?'#ffd400':'#161616')+'"/><text class="val" x="'+(x+22)+'" y="'+(172-h)+'" text-anchor="middle">'+(v>=1000?(v/1000).toFixed(1)+'k':v)+'</text><text x="'+(x+22)+'" y="198" text-anchor="middle">'+monthLabel(keys[i])+'</text>';});
+  const chart='<svg class="chart" viewBox="0 0 540 206" role="img" aria-label="Collections for the last 6 months">'+bars+'<line x1="10" y1="180" x2="530" y2="180" stroke="#3d3d43"/></svg>';
+  // mix
+  const liveRows=rows.filter(r=>isLive(r.s));
+  const planRows=DB.plans.slice().sort((a,b)=>a.months-b.months);
+  const pm=Math.max.apply(null,planRows.map(p=>liveRows.filter(r=>r.m.planId===p.id).length).concat([1]));
+  const mix=planRows.map(p=>{const n=liveRows.filter(r=>r.m.planId===p.id).length;return '<div class="r"><span>'+esc(p.name)+'</span><div class="bar"><i style="width:'+Math.round(n/pm*100)+'%"></i></div><span class="n">'+n+'</span></div>';}).join('');
+  // attention
+  const att=rows.filter(r=>r.s==='Expiring'||(r.s==='Expired'&&diffDays(t,r.m.end)<=7)).sort((a,b)=>a.m.end<b.m.end?-1:1).slice(0,7);
+  const attHtml=att.length?att.map(r=>{const d=diffDays(r.m.end,t);return '<div class="li"><div><b>'+esc(r.m.name)+'</b> '+chip(r.s)+'<div class="sub">'+esc(planName(r.m.planId))+' · ends '+fmtDate(r.m.end)+' · '+(d>=0?d+' days left':(-d)+' days ago')+'</div></div><div class="row"><a class="btn wa sm" target="_blank" rel="noopener" href="'+waLink(r.m,r.s==='Expired'?DB.settings.msgExpired:DB.settings.msgExpiring)+'">WhatsApp</a><button class="btn primary sm" data-act="renew" data-id="'+r.m.id+'">Renew</button></div></div>';}).join(''):'<div class="empty">Nobody is about to expire. Good week.</div>';
+  const recent=DB.payments.slice().sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:(a.rc<b.rc?1:-1)).slice(0,6);
+  const recHtml=recent.map(p=>{const m=memberById(p.memberId);return '<div class="li"><div><b>'+esc(m?m.name:'Deleted member')+'</b><div class="sub">'+esc(p.kind)+' · '+esc(p.planName)+' · '+fmtDate(p.date)+' · '+esc(p.mode)+'</div></div><b>'+money(p.paid)+'</b></div>';}).join('');
+  return head()+
+  '<div class="hero"><div><div class="lbl">Active members</div><div class="big">'+active+'</div></div><div class="side2"><b>'+cnt('Expiring')+'</b> expiring within '+DB.settings.warnDays+' days<br><b>'+cnt('Expired')+'</b> expired · <b>'+cnt('Frozen')+'</b> frozen</div></div><div class="herostripe"></div>'+
+  '<div class="stats">'+
+   '<button class="stat" data-act="goMembers" data-id="Expiring"><div class="v">'+cnt('Expiring')+'</div><div class="k">Expiring soon</div></button>'+
+   '<button class="stat" data-act="goMembers" data-id="Expired"><div class="v">'+cnt('Expired')+'</div><div class="k">Expired</div></button>'+
+   '<div class="stat"><div class="v">'+money(coll)+'</div><div class="k">Collected this month</div></div>'+
+   '<div class="stat"><div class="v">'+joins+'</div><div class="k">New joins this month</div></div>'+
+   '<button class="stat" data-act="goMembers" data-id="Due"><div class="v">'+money(dues)+'</div><div class="k">Pending dues</div></button>'+
+   '<button class="stat" data-act="go" data-id="checkin"><div class="v">'+today+'</div><div class="k">Check-ins today</div></button>'+
+  '</div>'+
+  '<div class="cols2"><div class="panel"><h3>Collections, last 6 months</h3>'+chart+'</div><div class="panel"><h3>Members by plan</h3><div class="mix">'+mix+'</div></div></div>'+
+  '<div class="cols2"><div class="panel"><div class="hd"><h3>Needs attention</h3><button class="btn sm" data-act="go" data-id="reminders">All reminders</button></div>'+attHtml+'</div><div class="panel"><h3>Recent payments</h3>'+recHtml+'</div></div>';
+}
+
+/* members */
+function memberList(){
+  const t=todayISO();
+  let list=DB.members.map(m=>({m:m,s:status(m),dl:diffDays(m.end,t),due:dueOf(m.id)}));
+  const q=UI.q.trim().toLowerCase();
+  if(q)list=list.filter(r=>(r.m.name+' '+r.m.id+' '+r.m.phone+' '+(r.m.email||'')).toLowerCase().includes(q));
+  if(UI.fStatus==='Due')list=list.filter(r=>r.due>0);else if(UI.fStatus!=='all')list=list.filter(r=>r.s===UI.fStatus);
+  if(UI.fPlan!=='all')list=list.filter(r=>r.m.planId===UI.fPlan);
+  const key={name:r=>r.m.name.toLowerCase(),id:r=>r.m.id,plan:r=>(planById(r.m.planId)||{months:0}).months,start:r=>r.m.start,end:r=>r.m.end,due:r=>r.due}[UI.sort]||(r=>r.m.end);
+  list.sort((a,b)=>{const x=key(a),y=key(b);return (x<y?-1:x>y?1:0)*UI.dir;});
+  return list;
+}
+function membersTable(){
+  const list=memberList();
+  if(!list.length)return '<div class="empty">No members match. Try clearing the filters or add a new member.</div>';
+  const th=(k,l,cls)=>'<th class="s '+(cls||'')+'" data-act="sort" data-id="'+k+'">'+l+(UI.sort===k?(UI.dir>0?' ▲':' ▼'):'')+'</th>';
+  return '<div class="tw"><table class="rt"><thead><tr>'+th('id','ID')+th('name','Member')+th('plan','Plan')+th('start','Start')+th('end','End date')+'<th class="num">Days left</th><th>Status</th>'+th('due','Due','num')+'<th></th></tr></thead><tbody>'+
+  list.map(r=>{const m=r.m;return '<tr><td data-l="ID">'+esc(m.id)+'</td><td class="h"><button class="nm" style="all:unset;cursor:pointer;font-weight:700" data-act="profile" data-id="'+m.id+'">'+esc(m.name)+'</button><span class="sm2">'+esc(m.phone)+'</span></td><td data-l="Plan">'+esc(planName(m.planId))+'</td><td data-l="Start">'+fmtDate(m.start)+'</td><td data-l="Ends">'+fmtDate(m.end)+'</td><td class="num" data-l="Days left">'+(r.dl>=0?r.dl:'–')+'</td><td data-l="Status">'+chip(r.s)+'</td><td class="num" data-l="Due">'+(r.due>0?'<b style="color:var(--orange)">'+money(r.due)+'</b>':'–')+'</td><td class="act"><div class="row"><button class="btn primary sm" data-act="renew" data-id="'+m.id+'">Renew</button><button class="btn sm" data-act="profile" data-id="'+m.id+'">Open</button></div></td></tr>';}).join('')+
+  '</tbody></table></div><div class="hint" style="margin-top:8px">'+list.length+' of '+DB.members.length+' members</div>';
+}
+function members(){
+  const st=['all','Active','Expiring','Expired','Frozen','Upcoming','Due'];
+  const stl={all:'All statuses',Due:'Has pending dues'};
+  return head(DB.members.length+' members on record')+
+  '<div class="bar2"><input type="search" id="mq" placeholder="Search name, ID, phone or email" value="'+esc(UI.q)+'" aria-label="Search members">'+
+  '<select id="mst" aria-label="Filter by status">'+st.map(s=>'<option value="'+s+'"'+(UI.fStatus===s?' selected':'')+'>'+(stl[s]||s)+'</option>').join('')+'</select>'+
+  '<select id="mpl" aria-label="Filter by plan"><option value="all">All plans</option>'+DB.plans.map(p=>'<option value="'+p.id+'"'+(UI.fPlan===p.id?' selected':'')+'>'+esc(p.name)+'</option>').join('')+'</select>'+
+  '<button class="btn" data-act="exportMembers">Export CSV</button></div><div id="mtable">'+membersTable()+'</div>';
+}
+function afterMembers(){
+  g('mq').oninput=e=>{UI.q=e.target.value;g('mtable').innerHTML=membersTable();};
+  g('mst').onchange=e=>{UI.fStatus=e.target.value;g('mtable').innerHTML=membersTable();};
+  g('mpl').onchange=e=>{UI.fPlan=e.target.value;g('mtable').innerHTML=membersTable();};
+}
+
+/* check-in */
+function checkin(){
+  const t=todayISO();
+  const list=DB.attendance.filter(a=>a.date===t).sort((a,b)=>a.time<b.time?1:-1);
+  return head('Front desk: type a member ID, phone number or name')+
+  '<div class="ci"><input type="text" id="ciq" placeholder="MM1001, 98xxxxxx or name" aria-label="Member lookup" autocomplete="off"><button class="btn primary" data-act="doCheckin">Check in</button></div>'+
+  '<div id="cires">'+(UI.lastCheck||'')+'</div>'+
+  '<div class="panel"><h3>Today ('+list.length+')</h3>'+(list.length?list.map(a=>{const m=memberById(a.memberId);return '<div class="li"><div><b>'+esc(m?m.name:a.memberId)+'</b><div class="sub">'+esc(a.memberId)+'</div></div><span>'+esc(a.time)+'</span></div>';}).join(''):'<div class="empty">No one has checked in yet today.</div>')+'</div>';
+}
+function afterCheckin(){const i=g('ciq');i.onkeydown=e=>{if(e.key==='Enter')ACTIONS.doCheckin();};i.focus();}
+function checkinCard(m){
+  const t=todayISO(),s=status(m);
+  const already=DB.attendance.some(a=>a.memberId===m.id&&a.date===t);
+  const ok=s==='Active'||s==='Expiring';
+  if(ok&&!already){DB.attendance.push({memberId:m.id,date:t,time:nowTime()});save();}
+  const d=diffDays(m.end,t);
+  let cls='ok',big='Welcome in',msg=esc(planName(m.planId))+' · valid till '+fmtDate(m.end)+' ('+d+' days left)';
+  if(already&&ok){cls='warn';big='Already checked in';}
+  if(s==='Expiring'&&!already){cls='warn';big='Entry OK: renew soon';}
+  if(!ok){cls='no';big=s==='Expired'?'Membership expired':s==='Frozen'?'Membership frozen':'Not started yet';msg=s==='Expired'?'Expired on '+fmtDate(m.end)+'. Ask the member to renew.':s==='Frozen'?'Frozen until '+fmtDate(m.frozenUntil)+'.':'Starts on '+fmtDate(m.start)+'.';}
+  return '<div class="cires '+cls+'">'+(cls!=='no'?'<div style="margin-bottom:10px">'+DUMBBELL(64,'rep')+'</div>':'')+'<div class="big">'+big+'</div><p style="margin:10px 0 4px"><b>'+esc(m.name)+'</b> · '+esc(m.id)+'</p><div class="hint">'+msg+'</div>'+(!ok&&s==='Expired'?'<div class="row" style="margin-top:12px"><button class="btn primary" data-act="renew" data-id="'+m.id+'">Renew now</button></div>':'')+'</div>';
+}
+
+/* reminders */
+function reminders(){
+  const t=todayISO(),rows=DB.members.map(m=>({m:m,s:status(m),d:diffDays(m.end,t)}));
+  const exp=rows.filter(r=>r.s==='Expiring').sort((a,b)=>a.d-b.d);
+  const gone=rows.filter(r=>r.s==='Expired'&&r.d>=-30).sort((a,b)=>b.d-a.d);
+  const due=DB.members.map(m=>({m:m,due:dueOf(m.id)})).filter(r=>r.due>0).sort((a,b)=>b.due-a.due);
+  const line=(r,tpl,sub)=>'<div class="li"><div><b>'+esc(r.m.name)+'</b><div class="sub">'+sub+' · '+esc(r.m.phone)+'</div></div><div class="row"><a class="btn wa sm" target="_blank" rel="noopener" href="'+waLink(r.m,tpl)+'">WhatsApp</a><a class="btn sm" href="tel:'+esc(r.m.phone)+'">Call</a><button class="btn primary sm" data-act="'+(tpl===DB.settings.msgDue?'collect':'renew')+'" data-id="'+r.m.id+'">'+(tpl===DB.settings.msgDue?'Collect':'Renew')+'</button></div></div>';
+  return head('One tap WhatsApp messages. Edit the wording in Settings.')+
+  '<div class="cols2 even"><div class="panel"><h3>Expiring in '+DB.settings.warnDays+' days ('+exp.length+')</h3>'+(exp.length?exp.map(r=>line(r,DB.settings.msgExpiring,'ends '+fmtDate(r.m.end)+' · '+r.d+' days left')).join(''):'<div class="empty">None right now.</div>')+'</div>'+
+  '<div class="panel"><h3>Lapsed in last 30 days ('+gone.length+')</h3>'+(gone.length?gone.map(r=>line(r,DB.settings.msgExpired,'expired '+fmtDate(r.m.end))).join(''):'<div class="empty">None right now.</div>')+'</div></div>'+
+  '<div class="panel"><h3>Pending dues ('+due.length+')</h3>'+(due.length?due.map(r=>line(r,DB.settings.msgDue,money(r.due)+' pending')).join(''):'<div class="empty">All clear. No dues.</div>')+'</div>';
+}
+
+/* plans */
+function plans(){
+  const rows=DB.plans.slice().sort((a,b)=>a.months-b.months).map(p=>{
+    const n=DB.members.filter(m=>m.planId===p.id&&isLive(status(m))).length;
+    return '<tr><td class="h"><b>'+esc(p.name)+'</b></td><td data-l="Duration">'+p.months+(p.months===1?' month':' months')+'</td><td class="num" data-l="Price">'+money(p.price)+'</td><td class="num" data-l="Per month">'+money(p.price/p.months)+'</td><td class="num" data-l="Active members">'+n+'</td><td data-l="Status">'+chip(p.active?'Live':'Off')+'</td><td class="act"><div class="row"><button class="btn sm" data-act="editPlan" data-id="'+p.id+'">Edit</button><button class="btn sm" data-act="togglePlan" data-id="'+p.id+'">'+(p.active?'Turn off':'Turn on')+'</button><button class="btn danger sm" data-act="delPlan" data-id="'+p.id+'">Delete</button></div></td></tr>';}).join('');
+  return head('Edit prices, durations and the joining fee')+
+  '<div class="panel" style="margin-bottom:22px"><div class="hd"><h3>Admission fee</h3></div><div class="row" style="align-items:flex-end"><div style="width:200px"><label for="adm">One time joining fee (₹)</label><input type="number" min="0" id="adm" value="'+DB.settings.admissionFee+'"></div><button class="btn primary" data-act="saveAdm">Save fee</button><span class="hint">Charged on new memberships only. Can be waived per member or by an offer.</span></div></div>'+
+  '<div class="bar2"><button class="btn primary" data-act="newPlan">+ Add plan</button><button class="btn" data-act="bulkPrice">Change all prices</button></div>'+
+  '<div class="tw"><table class="rt"><thead><tr><th>Plan</th><th>Duration</th><th class="num">Price</th><th class="num">Per month</th><th class="num">Active members</th><th>Status</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+
+/* offers */
+function offers(){
+  const order={Live:0,Scheduled:1,Paused:2,Ended:3};
+  const list=DB.offers.slice().sort((a,b)=>order[offerState(a)]-order[offerState(b)]);
+  const body=list.length?list.map(o=>{
+    const s=offerState(o),uses=DB.payments.filter(p=>p.offerId===o.id).length;
+    const pl=o.plans.length?o.plans.map(planName).join(', '):'all plans';
+    const aud={both:'new and renewing members',new:'new members only',renewal:'renewals only'}[o.audience];
+    return '<div class="offer '+s.toLowerCase()+'"><div><h3>'+esc(o.name)+' '+chip(s)+'</h3><div style="margin-top:6px"><b>'+esc(offerText(o))+'</b> on '+esc(pl)+' for '+aud+'</div><div class="meta">'+fmtDate(o.from)+' to '+fmtDate(o.to)+' · used '+uses+' time'+(uses===1?'':'s')+(o.desc?' · '+esc(o.desc):'')+'</div></div><div class="row"><button class="btn sm" data-act="editOffer" data-id="'+o.id+'">Edit</button><button class="btn sm" data-act="toggleOffer" data-id="'+o.id+'">'+(o.active?'Pause':'Resume')+'</button><button class="btn sm" data-act="dupOffer" data-id="'+o.id+'">Duplicate</button><button class="btn danger sm" data-act="delOffer" data-id="'+o.id+'">Delete</button></div></div>';}).join(''):'<div class="empty">No offers yet. Create one to run a campaign.</div>';
+  return head('Run festival deals, joining fee waivers and bonus days')+'<div class="bar2"><button class="btn primary" data-act="newOffer">+ New offer</button></div>'+body;
+}
+
+/* reports */
+function rangeDates(){
+  const t=todayISO(),d=parseISO(t);let from=t,to=t;
+  switch(UI.range){
+    case 'today':break;
+    case 'month':from=t.slice(0,8)+'01';break;
+    case 'last':from=fmtISO(new Date(d.getFullYear(),d.getMonth()-1,1));to=fmtISO(new Date(d.getFullYear(),d.getMonth(),0));break;
+    case '3m':from=addMonths(t,-3);break;
+    case 'year':from=d.getFullYear()+'-01-01';break;
+    case 'all':from='2000-01-01';break;
+    case 'custom':from=UI.from||'2000-01-01';to=UI.to||t;break;
+  }
+  return {from:from,to:to};
+}
+function buildReport(tab){
+  const t=todayISO(),R=rangeDates();
+  const inR=d=>d>=R.from&&d<=R.to;
+  if(tab==='collections'){
+    const ps=DB.payments.filter(p=>inR(p.date)).sort((a,b)=>a.date<b.date?1:-1);
+    const sum=f=>ps.reduce((a,p)=>a+f(p),0);
+    const by=(f)=>{const o={};ps.forEach(p=>{const k=f(p);o[k]=(o[k]||0)+p.paid;});return Object.keys(o).map(k=>'<div class="li"><span>'+esc(k)+'</span><b>'+money(o[k])+'</b></div>').join('')||'<div class="hint">No data</div>';};
+    return {title:'Collections',
+      summary:[['Collected',money(sum(p=>p.paid))],['Billed',money(sum(p=>p.total))],['Admission fees',money(sum(p=>Math.min(p.admission,p.paid)))],['Discounts given',money(sum(p=>p.discount))],['New admissions',ps.filter(p=>p.kind==='New').length],['Renewals',ps.filter(p=>p.kind==='Renewal').length]],
+      extra:'<div class="cols2 even"><div class="panel"><h3>By plan</h3>'+by(p=>p.planName)+'</div><div class="panel"><h3>By payment mode</h3>'+by(p=>p.mode)+'</div></div>',
+      columns:['Date','Receipt','Member','Type','Plan','Billed','Discount','Paid','Mode'],
+      rows:ps.map(p=>{const m=memberById(p.memberId);return [fmtDate(p.date),p.rc,m?m.name:'Deleted member',p.kind,p.planName,mc(p.total),mc(p.discount),mc(p.paid),p.mode];}),num:['Billed','Discount','Paid']};
+  }
+  if(tab==='memberships'){
+    const ms=DB.members.filter(m=>inR(m.joined)).sort((a,b)=>a.joined<b.joined?1:-1);
+    const live=DB.members.filter(m=>isLive(status(m)));
+    const f=live.filter(m=>m.gender==='Female').length;
+    return {title:'Memberships',
+      summary:[['Joined in range',ms.length],['Active now',live.length],['All time members',DB.members.length],['Women / men (active)',f+' / '+(live.length-f)]],
+      extra:'',columns:['Joined','ID','Member','Phone','Plan','Ends','Status'],
+      rows:ms.map(m=>[fmtDate(m.joined),m.id,m.name,m.phone,planName(m.planId),fmtDate(m.end),{t:status(m),c:status(m).toLowerCase()}]),num:[]};
+  }
+  if(tab==='expiry'){
+    const rows=DB.members.map(m=>({m:m,s:status(m),d:diffDays(m.end,t)})).filter(r=>r.d>=-30&&r.d<=30&&r.s!=='Upcoming').sort((a,b)=>a.d-b.d);
+    return {title:'Expiry and lapsed',
+      summary:[['Expiring in 7 days',rows.filter(r=>r.d>=0&&r.d<=7).length],['Expiring in 30 days',rows.filter(r=>r.d>=0).length],['Lapsed in last 30 days',rows.filter(r=>r.d<0).length]],
+      extra:'<div class="hint" style="margin-bottom:10px">Shows members whose end date falls within 30 days before or after today.</div>',
+      columns:['ID','Member','Phone','Plan','End date','Days left','Status'],
+      rows:rows.map(r=>[r.m.id,r.m.name,r.m.phone,planName(r.m.planId),fmtDate(r.m.end),r.d,{t:r.s,c:r.s.toLowerCase()}]),num:['Days left']};
+  }
+  if(tab==='dues'){
+    const rows=DB.members.map(m=>({m:m,due:dueOf(m.id),bill:DB.payments.filter(p=>p.memberId===m.id).reduce((a,p)=>a+p.total,0)})).filter(r=>r.due>0).sort((a,b)=>b.due-a.due);
+    return {title:'Pending dues',
+      summary:[['Members with dues',rows.length],['Total pending',money(rows.reduce((a,r)=>a+r.due,0))]],extra:'',
+      columns:['ID','Member','Phone','Billed','Paid','Due'],
+      rows:rows.map(r=>[r.m.id,r.m.name,r.m.phone,mc(r.bill),mc(r.bill-r.due),mc(r.due)]),num:['Billed','Paid','Due']};
+  }
+  const o={};
+  DB.payments.filter(p=>inR(p.date)&&(p.offer||p.discount>0)).forEach(p=>{const k=p.offer||'Manual discount';o[k]=o[k]||{n:0,d:0,r:0};o[k].n++;o[k].d+=p.discount;o[k].r+=p.paid;});
+  const keys=Object.keys(o);
+  return {title:'Offer performance',summary:[['Offers used',keys.reduce((a,k)=>a+o[k].n,0)],['Discount given',money(keys.reduce((a,k)=>a+o[k].d,0))]],extra:'',
+    columns:['Offer','Uses','Discount given','Collected'],rows:keys.map(k=>[k,o[k].n,mc(o[k].d),mc(o[k].r)]),num:['Uses','Discount given','Collected']};
+}
+function reportHTML(rep){
+  const cell=(c,right,lab)=>{if(c&&typeof c==='object'){return '<td data-l="'+esc(lab)+'" class="'+(right?'num':'')+'">'+(c.c?chip(c.t).replace('chip '+c.c,'chip '+c.c):esc(c.t))+'</td>';}return '<td data-l="'+esc(lab)+'" class="'+(right?'num':'')+'">'+esc(c)+'</td>';};
+  return '<div class="stats">'+rep.summary.map(s=>'<div class="stat"><div class="v">'+esc(s[1])+'</div><div class="k">'+esc(s[0])+'</div></div>').join('')+'</div>'+rep.extra+
+    (rep.rows.length?'<div class="tw"><table class="rt"><thead><tr>'+rep.columns.map(c=>'<th class="'+(rep.num.includes(c)?'num':'')+'">'+c+'</th>').join('')+'</tr></thead><tbody>'+rep.rows.map(r=>'<tr>'+r.map((c,i)=>cell(c,rep.num.includes(rep.columns[i]),rep.columns[i])).join('')+'</tr>').join('')+'</tbody></table></div>':'<div class="empty">Nothing to show for this period.</div>');
+}
+function reports(){
+  const tabs=[['collections','Collections'],['memberships','Memberships'],['expiry','Expiry'],['dues','Dues'],['offers','Offers']];
+  const rg=[['today','Today'],['month','This month'],['last','Last month'],['3m','Last 3 months'],['year','This year'],['all','All time'],['custom','Custom']];
+  const showRange=UI.rep==='collections'||UI.rep==='memberships'||UI.rep==='offers';
+  return head('Revenue, member and expiry reports')+
+  '<div class="tabs">'+tabs.map(x=>'<button class="'+(UI.rep===x[0]?'on':'')+'" data-act="repTab" data-id="'+x[0]+'">'+x[1]+'</button>').join('')+'</div>'+
+  '<div class="bar2">'+(showRange?'<select id="rrange" aria-label="Date range">'+rg.map(x=>'<option value="'+x[0]+'"'+(UI.range===x[0]?' selected':'')+'>'+x[1]+'</option>').join('')+'</select>'+(UI.range==='custom'?'<input type="date" id="rfrom" style="width:auto" value="'+esc(UI.from)+'" aria-label="From date"><input type="date" id="rto" style="width:auto" value="'+esc(UI.to)+'" aria-label="To date">':''):'')+
+  '<span style="flex:1"></span><button class="btn" data-act="repCsv">Export CSV</button><button class="btn" data-act="repPrint">Print</button></div><div id="rbody">'+reportHTML(buildReport(UI.rep))+'</div>';
+}
+function afterReports(){
+  const r=g('rrange');if(r)r.onchange=e=>{UI.range=e.target.value;render();};
+  const f=g('rfrom'),t=g('rto');
+  if(f)f.onchange=e=>{UI.from=e.target.value;g('rbody').innerHTML=reportHTML(buildReport(UI.rep));};
+  if(t)t.onchange=e=>{UI.to=e.target.value;g('rbody').innerHTML=reportHTML(buildReport(UI.rep));};
+}
+
+/* settings */
+function settings(){
+  const s=DB.settings;
+  return head('Gym details, message templates and your data')+
+  '<div class="cols2 even"><div class="panel"><h3>Gym</h3>'+
+   '<div class="g1"><label for="s-gymName">Gym name</label><input id="s-gymName" data-setting="gymName" value="'+esc(s.gymName)+'"></div>'+
+   '<div class="g2"><div><label for="s-admissionFee">Admission fee (₹)</label><input type="number" min="0" id="s-admissionFee" data-setting="admissionFee" value="'+s.admissionFee+'"></div><div><label for="s-warnDays">Expiry warning (days)</label><input type="number" min="1" max="60" id="s-warnDays" data-setting="warnDays" value="'+s.warnDays+'"></div></div>'+
+   '<div class="g1"><label for="s-countryCode">WhatsApp country code</label><input id="s-countryCode" data-setting="countryCode" value="'+esc(s.countryCode)+'"></div>'+
+   '<div class="g1"><label for="s-fx">Animations on this device</label><select id="s-fx"><option value="auto"'+(fxMode()==='auto'?' selected':'')+'>Auto (off on very low-end phones)</option><option value="on"'+(fxMode()==='on'?' selected':'')+'>Always on</option><option value="off"'+(fxMode()==='off'?' selected':'')+'>Off</option></select></div></div>'+
+  '<div class="panel"><h3>Message templates</h3><div class="hint" style="margin-bottom:10px">Use {name} {gym} {plan} {end} {days} {due}</div>'+
+   '<div class="g1"><label for="s-msgExpiring">Expiring soon</label><textarea id="s-msgExpiring" data-setting="msgExpiring">'+esc(s.msgExpiring)+'</textarea></div>'+
+   '<div class="g1"><label for="s-msgExpired">Expired</label><textarea id="s-msgExpired" data-setting="msgExpired">'+esc(s.msgExpired)+'</textarea></div>'+
+   '<div class="g1"><label for="s-msgDue">Pending dues</label><textarea id="s-msgDue" data-setting="msgDue">'+esc(s.msgDue)+'</textarea></div></div></div>'+
+  '<div class="panel" style="margin-bottom:22px"><h3>Security</h3><p class="hint" style="margin-top:0">Admin username is <b>admin</b>. Members sign in with their registered phone number. Until a member changes it, their password is the first 3 letters of their name plus the last 4 digits of their phone (shown in their profile). You can reset a member back to that default from their profile.</p><div class="row"><button class="btn primary" data-act="adminPw">Change admin password</button><button class="btn" data-act="logout">Log out</button></div></div>'+
+  '<div class="panel"><h3>Your data</h3><p class="hint" style="margin-top:0">Everything is saved in this browser (localStorage). Download a backup before clearing browser data or switching device.</p><div class="row">'+
+   '<button class="btn primary" data-act="backup">Download backup (JSON)</button><button class="btn" data-act="restore">Restore backup</button><button class="btn" data-act="exportMembers">Members CSV</button><button class="btn" data-act="exportPayments">Payments CSV</button>'+
+   '<button class="btn danger" data-act="resetDemo">Reset to demo data</button><button class="btn danger" data-act="clearAll">Clear all members</button></div></div>';
+}
+
+const VIEWS={dashboard:dashboard,members:members,checkin:checkin,reminders:reminders,plans:plans,offers:offers,reports:reports,settings:settings};
+const AFTER={members:afterMembers,checkin:afterCheckin,reports:afterReports};
+
+function renderAdmin(){
+  const firstPaint=UI._last!==UI.view;document.body.classList.toggle('anim',firstPaint);UI._last=UI.view;
+  const nm=DB.settings.gymName.trim().split(/\s+/),first=nm.shift();
+  g('brandName').innerHTML='<span>'+esc(first)+'</span>'+(nm.length?'<span class="y">'+esc(nm.join(' '))+'</span>':'');
+  document.title=DB.settings.gymName+' – Membership Manager';
+  const soon=DB.members.filter(m=>status(m)==='Expiring').length;
+  g('nav').innerHTML=NAV.map(n=>'<button data-act="go" data-id="'+n[0]+'" class="'+(UI.view===n[0]?'on':'')+'"><span>'+n[1]+'</span>'+(n[0]==='reminders'&&soon?'<span class="bd">'+soon+'</span>':'')+'</button>').join('');
+  const IC={dashboard:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',members:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.5a3.5 3.5 0 010 7M18 14.3c2.2.6 3.5 2.4 3.5 5.7"/>',checkin:'<circle cx="12" cy="12" r="9"/><path d="M7.5 12.5l3 3 6-6.5"/>',reminders:'<path d="M6 17v-6a6 6 0 0112 0v6l1.5 2h-15z"/><path d="M10 21h4"/>',more:'<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>'};
+  const TABS=[['dashboard','Home'],['members','Members'],['checkin','Check-in'],['reminders','Reminders'],['more','More']];
+  const inMore=['plans','offers','reports','settings'].includes(UI.view);
+  g('tabbar').innerHTML=TABS.map(t=>{const on=t[0]==='more'?inMore:UI.view===t[0];return '<button data-act="'+(t[0]==='more'?'more':'go')+'" data-id="'+t[0]+'" class="'+(on?'on':'')+'" aria-label="'+t[1]+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+IC[t[0]]+'</svg><span>'+t[1]+'</span>'+(t[0]==='reminders'&&soon?'<span class="bd">'+soon+'</span>':'')+'</button>';}).join('');
+  g('main').innerHTML=VIEWS[UI.view]();
+  if(AFTER[UI.view])AFTER[UI.view]();
+  if(UI.view==='dashboard'&&firstPaint&&!document.body.classList.contains('lite')){const hb=document.querySelector('.hero .big');if(hb)countUp(hb);}
+}
+
+/* ---------- purchase (new member / renew) ---------- */
+function openPurchase(mid){
+  const m=mid?memberById(mid):null,isNew=!m;
+  const pls=DB.plans.filter(p=>p.active).sort((a,b)=>a.months-b.months);
+  if(!pls.length){toast('Turn on at least one plan first','err');return;}
+  const t=todayISO();
+  const dp=m?(pls.find(p=>p.id===m.planId)||pls[0]):pls[0];
+  const dstart=m?(m.end>=t?addDays(m.end,1):t):t;
+  const who=isNew?
+    '<div class="g2"><div><label for="f-name">Full name</label><input id="f-name" autocomplete="off"></div><div><label for="f-phone">Phone</label><input id="f-phone" inputmode="numeric" placeholder="10 digit mobile"></div></div>'+
+    '<div class="g2"><div><label for="f-email">Email (optional)</label><input id="f-email" type="email"></div><div><label for="f-gender">Gender</label><select id="f-gender"><option>Male</option><option>Female</option><option>Other</option></select></div></div>'
+    :'<div class="sum" style="margin-top:0"><div class="l"><span>Member</span><b>'+esc(m.name)+' · '+esc(m.id)+'</b></div><div class="l"><span>Current plan ends</span><b>'+fmtDate(m.end)+'</b></div></div>';
+  openModal(isNew?'New membership':'Renew membership',
+    who+
+    '<div class="g2"><div><label for="f-plan">Plan</label><select id="f-plan">'+pls.map(p=>'<option value="'+p.id+'"'+(p.id===dp.id?' selected':'')+'>'+esc(p.name)+' · '+money(p.price)+'</option>').join('')+'</select></div><div><label for="f-start">Starts on</label><input type="date" id="f-start" value="'+dstart+'"></div></div>'+
+    '<div class="g2"><div><label for="f-offer">Offer</label><select id="f-offer"></select></div><div><label for="f-extra">Extra discount (₹)</label><input type="number" min="0" id="f-extra" value="0"></div></div>'+
+    '<div class="g1"><label class="chk"><input type="checkbox" id="f-flag"> '+(isNew?'Waive admission fee for this member':'Charge admission fee again (returning after a long break)')+'</label></div>'+
+    '<div id="f-sum" class="sum"></div>'+
+    '<div class="g2"><div><label for="f-mode">Payment mode</label><select id="f-mode"><option>Cash</option><option>UPI</option><option>Card</option><option>Bank transfer</option></select></div><div><label for="f-paid">Amount received now (₹)</label><input type="number" min="0" id="f-paid"></div></div>'+
+    '<div class="mact"><button class="btn" data-act="closeModal">Cancel</button><button class="btn primary" data-act="savePurchase" data-id="'+(mid||'')+'">'+(isNew?'Add member and take payment':'Renew and take payment')+'</button></div>');
+  let paidDirty=false;
+  function buildOffers(){
+    const sel=g('f-offer'),keep=sel.value,pid=g('f-plan').value;
+    const ok=DB.offers.filter(o=>offerApplies(o,pid,isNew));
+    sel.innerHTML='<option value="">No offer</option>'+ok.map(o=>'<option value="'+o.id+'">'+esc(o.name)+' ('+esc(offerText(o))+')</option>').join('');
+    if(ok.some(o=>o.id===keep))sel.value=keep;
+  }
+  function recalc(e){
+    if(e&&e.target&&e.target.id==='f-paid')paidDirty=true;
+    if(e&&e.target&&e.target.id==='f-plan')buildOffers();
+    const r=readPurchase(isNew);
+    if(!r)return;
+    const q=r.q;
+    g('f-sum').innerHTML=
+      '<div class="l"><span>Plan fee ('+esc(r.plan.name)+')</span><b>'+money(q.base)+'</b></div>'+
+      '<div class="l"><span>Admission fee</span><b>'+(q.adm?money(q.adm):'None')+'</b></div>'+
+      (q.disc?'<div class="l"><span>Offer discount</span><b>- '+money(q.disc)+'</b></div>':'')+
+      (q.extra?'<div class="l"><span>Extra discount</span><b>- '+money(q.extra)+'</b></div>':'')+
+      '<div class="l"><span>Membership runs</span><b>'+fmtDate(r.start)+' to '+fmtDate(r.end)+(q.bonus?' (+'+q.bonus+' bonus days)':'')+'</b></div>'+
+      '<div class="l t"><span>Total payable</span><b>'+money(q.total)+'</b></div>';
+    if(!paidDirty)g('f-paid').value=q.total;
+  }
+  buildOffers();recalc();
+  g('modalBody').oninput=recalc;g('modalBody').onchange=recalc;
+  setTimeout(()=>{const f=g(isNew?'f-name':'f-plan');if(f)f.focus();},30);
+}
+function readPurchase(isNew){
+  const plan=planById(g('f-plan').value);
+  if(!plan)return null;
+  const start=g('f-start').value||todayISO();
+  const offer=DB.offers.find(o=>o.id===g('f-offer').value)||null;
+  const q=quote(plan,offer,isNew,g('f-flag').checked,g('f-extra').value);
+  const end=addDays(addDays(addMonths(start,plan.months),-1),q.bonus);
+  return {plan:plan,offer:offer,q:q,start:start,end:end};
+}
+function savePurchase(mid){
+  const m=mid?memberById(mid):null,isNew=!m;
+  const r=readPurchase(isNew);if(!r)return;
+  let name,phone;
+  if(isNew){
+    name=g('f-name').value.trim();phone=digits(g('f-phone').value).slice(-10);
+    if(!name){toast('Enter the member name','err');return;}
+    if(phone.length!==10){toast('Enter a 10 digit phone number','err');return;}
+    if(DB.members.some(x=>x.phone===phone)){toast('A member with this phone number already exists','err');return;}
+  }
+  const paid=Math.max(0,Number(g('f-paid').value)||0);
+  if(paid>r.q.total){toast('Amount received is more than the total payable','err');return;}
+  let member=m;
+  if(isNew){
+    member={id:nextMemberId(),name:name,phone:phone,email:g('f-email').value.trim(),gender:g('f-gender').value,joined:r.start,planId:r.plan.id,start:r.start,end:r.end,notes:'',frozenUntil:null};
+    DB.members.push(member);
+  }else{
+    member.planId=r.plan.id;member.start=r.start;member.end=r.end;
+  }
+  const pay={id:uid('pay'),rc:nextRc(),memberId:member.id,date:todayISO(),kind:isNew?'New':'Renewal',planId:r.plan.id,planName:r.plan.name,months:r.plan.months,planPrice:r.q.base,admission:r.q.adm,discount:r.q.disc+r.q.extra,total:r.q.total,paid:paid,mode:g('f-mode').value,offer:r.offer?r.offer.name:(r.q.extra?'Manual discount':''),offerId:r.offer?r.offer.id:'',start:r.start,end:r.end};
+  DB.payments.push(pay);save();
+  closeModal();render();
+  const bal=pay.total-pay.paid;
+  openModal('Payment recorded',
+    '<div class="sum" style="margin-top:0"><div class="l"><span>Member</span><b>'+esc(member.name)+' · '+esc(member.id)+'</b></div><div class="l"><span>Plan</span><b>'+esc(pay.planName)+'</b></div><div class="l"><span>Valid</span><b>'+fmtDate(pay.start)+' to '+fmtDate(pay.end)+'</b></div><div class="l"><span>Receipt</span><b>'+esc(pay.rc)+'</b></div><div class="l t"><span>Received</span><b>'+money(pay.paid)+'</b></div>'+(bal>0?'<div class="l"><span>Balance due</span><b style="color:var(--orange)">'+money(bal)+'</b></div>':'')+'</div>'+
+    '<div class="mact"><a class="btn wa" target="_blank" rel="noopener" href="'+waLink(member,'Hi {name}, thank you for joining {gym}! Payment of '+money(pay.paid)+' received (receipt '+pay.rc+'). Your {plan} membership is valid till {end}.')+'">Send on WhatsApp</a><button class="btn" data-act="receipt" data-id="'+pay.id+'">Print receipt</button><button class="btn primary" data-act="closeModal">Done</button></div>');
+}
+function receipt(pid){
+  const p=DB.payments.find(x=>x.id===pid);if(!p)return;
+  const m=memberById(p.memberId)||{name:'Deleted member',id:p.memberId,phone:''};
+  const L=(a,b)=>'<div class="l" style="display:flex;justify-content:space-between;padding:3px 0"><span>'+a+'</span><span>'+b+'</span></div>';
+  closeModal();
+  printHTML('<div class="rc" style="max-width:420px;margin:0 auto;border:2px solid #000;padding:18px"><h2 style="text-align:center;margin:0">'+esc(DB.settings.gymName)+'</h2><div style="text-align:center;margin-bottom:10px">Payment receipt</div><hr>'+
+    L('Receipt no.',esc(p.rc))+L('Date',fmtDate(p.date))+L('Member',esc(m.name))+L('Member ID',esc(m.id))+L('Phone',esc(m.phone))+'<hr>'+
+    L('Type',esc(p.kind))+L('Plan',esc(p.planName))+(p.start?L('Valid',fmtDate(p.start)+' to '+fmtDate(p.end)):'')+'<hr>'+
+    L('Plan fee',money(p.planPrice))+(p.admission?L('Admission fee',money(p.admission)):'')+(p.discount?L('Discount'+(p.offer?' ('+esc(p.offer)+')':''),'- '+money(p.discount)):'')+L('<b>Total</b>','<b>'+money(p.total)+'</b>')+L('Paid ('+esc(p.mode)+')',money(p.paid))+(p.total-p.paid>0?L('Balance due',money(p.total-p.paid)):'')+
+    '<hr><div style="text-align:center;font-size:12px">Thank you. Train hard.</div></div>');
+}
+
+/* ---------- other modals ---------- */
+function openProfile(id){
+  const m=memberById(id);if(!m)return;
+  const s=status(m),due=dueOf(id),t=todayISO();
+  const pays=DB.payments.filter(p=>p.memberId===id).sort((a,b)=>a.date<b.date?1:-1);
+  const att=DB.attendance.filter(a=>a.memberId===id);
+  const last30=att.filter(a=>diffDays(t,a.date)<=30).length;
+  const last=att.slice().sort((a,b)=>a.date<b.date?1:-1)[0];
+  openModal(m.name,
+   '<div class="row" style="margin-bottom:6px">'+chip(s)+'<span class="hint">'+esc(m.id)+' · '+esc(m.phone)+(m.email?' · '+esc(m.email):'')+' · '+esc(m.gender)+'</span></div>'+
+   '<div class="kv"><div><span>Plan</span><b>'+esc(planName(m.planId))+'</b></div><div><span>Current period</span><b>'+fmtDate(m.start)+' to '+fmtDate(m.end)+'</b></div><div><span>Days left</span><b>'+Math.max(0,diffDays(m.end,t))+'</b></div><div><span>Member since</span><b>'+fmtDate(m.joined)+'</b></div><div><span>Visits (30 days)</span><b>'+last30+'</b></div><div><span>Last visit</span><b>'+(last?fmtDate(last.date):'–')+'</b></div><div><span>Pending due</span><b style="color:'+(due>0?'var(--orange)':'inherit')+'">'+money(due)+'</b></div></div>'+
+   '<div class="hint" style="margin-bottom:12px">Member login: '+esc(m.phone)+' · '+(m.auth?'custom password set':'default password <b>'+esc(defaultPw(m))+'</b>')+'</div>'+
+   (m.notes?'<div class="hint" style="margin-bottom:12px">Notes: '+esc(m.notes)+'</div>':'')+
+   '<div class="row" style="margin-bottom:16px"><button class="btn primary" data-act="renew" data-id="'+id+'">Renew</button><button class="btn" data-act="editMember" data-id="'+id+'">Edit</button>'+
+   (s==='Frozen'?'<button class="btn" data-act="unfreeze" data-id="'+id+'">Unfreeze</button>':(isLive(s)?'<button class="btn" data-act="freeze" data-id="'+id+'">Freeze</button>':''))+
+   (due>0?'<button class="btn" data-act="collect" data-id="'+id+'">Collect due</button>':'')+
+   (m.auth?'<button class="btn" data-act="resetPw" data-id="'+id+'">Reset password</button>':'')+
+   '<button class="btn" data-act="checkinNow" data-id="'+id+'">Check in now</button><a class="btn wa" target="_blank" rel="noopener" href="'+waLink(m,s==='Expired'?DB.settings.msgExpired:DB.settings.msgExpiring)+'">WhatsApp</a><button class="btn danger" data-act="delMember" data-id="'+id+'">Delete</button></div>'+
+   '<h3 style="margin-bottom:8px">Payments</h3>'+(pays.length?'<div class="tw"><table class="rt"><thead><tr><th>Date</th><th>Receipt</th><th>Type</th><th>Plan</th><th class="num">Paid</th><th></th></tr></thead><tbody>'+pays.map(p=>'<tr><td data-l="Date">'+fmtDate(p.date)+'</td><td data-l="Receipt">'+esc(p.rc)+'</td><td data-l="Type">'+esc(p.kind)+'</td><td data-l="Plan">'+esc(p.planName)+'</td><td class="num" data-l="Paid">'+money(p.paid)+'</td><td class="act"><button class="btn sm" data-act="receipt" data-id="'+p.id+'">Receipt</button></td></tr>').join('')+'</tbody></table></div>':'<div class="empty">No payments yet.</div>'),true);
+}
+function openEdit(id){
+  const m=memberById(id);
+  openModal('Edit member',
+   '<div class="g2"><div><label for="e-name">Name</label><input id="e-name" value="'+esc(m.name)+'"></div><div><label for="e-phone">Phone</label><input id="e-phone" value="'+esc(m.phone)+'"></div></div>'+
+   '<div class="g2"><div><label for="e-email">Email</label><input id="e-email" value="'+esc(m.email)+'"></div><div><label for="e-gender">Gender</label><select id="e-gender">'+['Male','Female','Other'].map(x=>'<option'+(m.gender===x?' selected':'')+'>'+x+'</option>').join('')+'</select></div></div>'+
+   '<div class="g2"><div><label for="e-start">Period start</label><input type="date" id="e-start" value="'+m.start+'"></div><div><label for="e-end">Period end</label><input type="date" id="e-end" value="'+m.end+'"></div></div>'+
+   '<div class="g1"><label for="e-plan">Plan</label><select id="e-plan">'+DB.plans.map(p=>'<option value="'+p.id+'"'+(p.id===m.planId?' selected':'')+'>'+esc(p.name)+'</option>').join('')+'</select></div>'+
+   '<div class="g1"><label for="e-notes">Notes</label><textarea id="e-notes">'+esc(m.notes)+'</textarea></div>'+
+   '<div class="mact"><button class="btn" data-act="profile" data-id="'+id+'">Cancel</button><button class="btn primary" data-act="saveEdit" data-id="'+id+'">Save changes</button></div>');
+}
+function openFreeze(id){
+  const m=memberById(id);
+  openModal('Freeze membership',
+   '<p class="hint" style="margin-top:0">'+esc(m.name)+' will not be able to check in while frozen. The end date moves forward by the same number of days.</p>'+
+   '<div class="g1"><label for="z-days">Freeze for (days)</label><input type="number" min="1" max="90" id="z-days" value="15"></div>'+
+   '<div class="mact"><button class="btn" data-act="profile" data-id="'+id+'">Cancel</button><button class="btn primary" data-act="saveFreeze" data-id="'+id+'">Freeze</button></div>');
+}
+function openCollect(id){
+  const m=memberById(id),due=dueOf(id);
+  openModal('Collect pending due',
+   '<div class="sum" style="margin-top:0"><div class="l"><span>Member</span><b>'+esc(m.name)+'</b></div><div class="l t"><span>Pending</span><b>'+money(due)+'</b></div></div>'+
+   '<div class="g2"><div><label for="c-amt">Amount received (₹)</label><input type="number" min="1" max="'+due+'" id="c-amt" value="'+due+'"></div><div><label for="c-mode">Payment mode</label><select id="c-mode"><option>Cash</option><option>UPI</option><option>Card</option><option>Bank transfer</option></select></div></div>'+
+   '<div class="mact"><button class="btn" data-act="closeModal">Cancel</button><button class="btn primary" data-act="saveCollect" data-id="'+id+'">Record payment</button></div>');
+}
+function openPlan(id){
+  const p=id?planById(id):{name:'',months:1,price:DB.plans.length?Math.round((DB.plans.find(x=>x.months===1)||{price:700}).price):700,active:true};
+  openModal(id?'Edit plan':'New plan',
+   '<div class="g1"><label for="pl-name">Plan name</label><input id="pl-name" value="'+esc(p.name)+'" placeholder="e.g. 2 Months"></div>'+
+   '<div class="g2"><div><label for="pl-months">Duration (months)</label><input type="number" min="1" max="36" id="pl-months" value="'+p.months+'"></div><div><label for="pl-price">Price (₹)</label><input type="number" min="0" id="pl-price" value="'+p.price+'"></div></div>'+
+   '<div class="g1"><label class="chk"><input type="checkbox" id="pl-active"'+(p.active?' checked':'')+'> Available for new sign ups</label></div>'+
+   '<div class="mact"><button class="btn" data-act="closeModal">Cancel</button><button class="btn primary" data-act="savePlan" data-id="'+(id||'')+'">Save plan</button></div>');
+}
+function openOffer(id,dup){
+  const t=todayISO();
+  const o=id?DB.offers.find(x=>x.id===id):{name:'',desc:'',type:'percent',value:10,plans:[],audience:'both',from:t,to:addDays(t,14),active:true};
+  const name=dup?o.name+' (copy)':o.name;
+  openModal(id&&!dup?'Edit offer':'New offer',
+   '<div class="g1"><label for="of-name">Offer name</label><input id="of-name" value="'+esc(name)+'" placeholder="e.g. New Year 20% off"></div>'+
+   '<div class="g1"><label for="of-desc">Note (optional)</label><input id="of-desc" value="'+esc(o.desc)+'"></div>'+
+   '<div class="g2"><div><label for="of-type">Offer type</label><select id="of-type">'+[['percent','Percentage off plan fee'],['flat','Flat ₹ off plan fee'],['admission','Waive admission fee'],['freedays','Bonus free days']].map(x=>'<option value="'+x[0]+'"'+(o.type===x[0]?' selected':'')+'>'+x[1]+'</option>').join('')+'</select></div><div><label for="of-value">Value</label><input type="number" min="0" id="of-value" value="'+o.value+'"></div></div>'+
+   '<div class="g1"><label>Applies to plans (none ticked means all plans)</label><div class="row">'+DB.plans.map(p=>'<label class="chk"><input type="checkbox" class="of-plan" value="'+p.id+'"'+(o.plans.includes(p.id)?' checked':'')+'> '+esc(p.name)+'</label>').join('')+'</div></div>'+
+   '<div class="g2"><div><label for="of-aud">For</label><select id="of-aud">'+[['both','New and renewing'],['new','New members only'],['renewal','Renewals only']].map(x=>'<option value="'+x[0]+'"'+(o.audience===x[0]?' selected':'')+'>'+x[1]+'</option>').join('')+'</select></div><div></div></div>'+
+   '<div class="g2"><div><label for="of-from">Starts</label><input type="date" id="of-from" value="'+o.from+'"></div><div><label for="of-to">Ends</label><input type="date" id="of-to" value="'+o.to+'"></div></div>'+
+   '<div class="mact"><button class="btn" data-act="closeModal">Cancel</button><button class="btn primary" data-act="saveOffer" data-id="'+(id&&!dup?id:'')+'">Save offer</button></div>');
+}
+function openBulk(){
+  openModal('Change all prices',
+   '<p class="hint" style="margin-top:0">Raise or lower every plan price by a percentage. Use a negative number to reduce. Prices round to the nearest ₹10.</p>'+
+   '<div class="g1"><label for="b-pct">Change (%)</label><input type="number" id="b-pct" value="5"></div>'+
+   '<div class="mact"><button class="btn" data-act="closeModal">Cancel</button><button class="btn primary" data-act="saveBulk">Apply to all plans</button></div>');
+}
+
+function openMore(){
+  const items=[['plans','Plans and fees','Prices, durations, admission fee'],['offers','Offers','Run and manage campaigns'],['reports','Reports','Collections, expiry, dues'],['settings','Settings and data','Gym details, templates, backup']];
+  openModal('More','<div>'+items.map(i=>'<button class="moreitem" data-act="go" data-id="'+i[0]+'"><b>'+i[1]+'</b><span>'+i[2]+'</span></button>').join('')+'<button class="moreitem" data-act="logout"><b>Log out</b><span>Sign out of this device</span></button></div>');
+}
+/* ---------- actions ---------- */
+const ACTIONS={
+  closeModal:closeModal,
+  more:()=>openMore(),
+  logout:()=>{setSession(null);closeModal();UI.view='dashboard';UI._last=null;render();window.scrollTo(0,0);},
+  memberPw:()=>openPw(false),
+  savePw:()=>{
+    const m=SESSION&&SESSION.role==='member'?memberById(SESSION.id):null;if(!m)return;
+    const f=pwFields(6);if(!f)return;
+    if(!memberPwOk(m,f.cur)){toast('Current password is wrong','err');return;}
+    const salt=rndSalt();m.auth={salt:salt,hash:memberHash(salt,m.id,f.n)};save();closeModal();render();toast('Password changed');
+  },
+  adminPw:()=>openPw(true),
+  saveAdminPw:()=>{
+    const f=pwFields(8);if(!f)return;
+    const a=adminAuth();if(adminHash(a.salt,f.cur)!==a.hash){toast('Current password is wrong','err');return;}
+    const salt=rndSalt();DB.settings.adminAuth={salt:salt,hash:adminHash(salt,f.n)};save();closeModal();toast('Admin password changed');
+  },
+  resetPw:id=>{const m=memberById(id);if(!m)return;delete m.auth;save();openProfile(id);toast('Password reset to the default');},
+  go:id=>{UI.view=id;closeModal();render();window.scrollTo(0,0);},
+  goMembers:id=>{UI.view='members';UI.fStatus=id;UI.q='';UI.fPlan='all';render();window.scrollTo(0,0);},
+  newMember:()=>openPurchase(null),
+  renew:id=>openPurchase(id),
+  savePurchase:id=>savePurchase(id),
+  receipt:id=>{const p=DB.payments.find(x=>x.id===id);if(SESSION&&SESSION.role==='member'&&(!p||p.memberId!==SESSION.id))return;receipt(id);},
+  profile:id=>openProfile(id),
+  editMember:id=>openEdit(id),
+  saveEdit:id=>{
+    const m=memberById(id),name=g('e-name').value.trim(),phone=digits(g('e-phone').value).slice(-10);
+    if(!name){toast('Enter the member name','err');return;}
+    if(phone.length!==10){toast('Enter a 10 digit phone number','err');return;}
+    if(DB.members.some(x=>x.id!==id&&x.phone===phone)){toast('Another member already uses this phone number','err');return;}
+    if(g('e-end').value<g('e-start').value){toast('End date cannot be before the start date','err');return;}
+    Object.assign(m,{name:name,phone:phone,email:g('e-email').value.trim(),gender:g('e-gender').value,start:g('e-start').value,end:g('e-end').value,planId:g('e-plan').value,notes:g('e-notes').value.trim()});
+    save();render();openProfile(id);toast('Member updated');
+  },
+  freeze:id=>openFreeze(id),
+  saveFreeze:id=>{
+    const d=Math.floor(Number(g('z-days').value));
+    if(!(d>=1)){toast('Enter the number of days','err');return;}
+    const m=memberById(id);m.frozenUntil=addDays(todayISO(),d);m.end=addDays(m.end,d);save();render();openProfile(id);toast('Frozen for '+d+' days. End date extended.');
+  },
+  unfreeze:id=>{
+    const m=memberById(id),rem=Math.max(0,diffDays(m.frozenUntil,todayISO()));
+    m.end=addDays(m.end,-rem);m.frozenUntil=null;save();render();openProfile(id);toast('Membership resumed');
+  },
+  collect:id=>openCollect(id),
+  saveCollect:id=>{
+    const due=dueOf(id),amt=Number(g('c-amt').value)||0;
+    if(amt<=0||amt>due){toast('Enter an amount up to '+money(due),'err');return;}
+    const m=memberById(id);
+    const pay={id:uid('pay'),rc:nextRc(),memberId:id,date:todayISO(),kind:'Due payment',planId:m.planId,planName:planName(m.planId),months:0,planPrice:0,admission:0,discount:0,total:0,paid:amt,mode:g('c-mode').value,offer:'',offerId:'',start:'',end:''};
+    DB.payments.push(pay);save();render();openProfile(id);toast('Collected '+money(amt));
+  },
+  checkinNow:id=>{const m=memberById(id);const s=status(m);if(!isLive(s)||s==='Frozen'){toast('Cannot check in: membership is '+s.toLowerCase(),'err');return;}if(DB.attendance.some(a=>a.memberId===id&&a.date===todayISO())){toast('Already checked in today');return;}DB.attendance.push({memberId:id,date:todayISO(),time:nowTime()});save();render();openProfile(id);toast('Checked in');},
+  delMember:id=>{const m=memberById(id);if(!confirm('Delete '+m.name+' and their attendance? Payment history stays in reports.'))return;DB.members=DB.members.filter(x=>x.id!==id);DB.attendance=DB.attendance.filter(a=>a.memberId!==id);save();closeModal();render();toast('Member deleted');},
+  sort:k=>{if(UI.sort===k)UI.dir*=-1;else{UI.sort=k;UI.dir=1;}g('mtable').innerHTML=membersTable();},
+  exportMembers:()=>{const t=todayISO();download('members-'+t+'.csv',csv(['ID','Name','Phone','Email','Gender','Plan','Start','End','Status','Due'],DB.members.map(m=>[m.id,m.name,m.phone,m.email,m.gender,planName(m.planId),m.start,m.end,status(m),dueOf(m.id)])),'text/csv');},
+  exportPayments:()=>{download('payments-'+todayISO()+'.csv',csv(['Receipt','Date','Member ID','Type','Plan','Plan price','Admission','Discount','Total','Paid','Mode','Offer'],DB.payments.map(p=>[p.rc,p.date,p.memberId,p.kind,p.planName,p.planPrice,p.admission,p.discount,p.total,p.paid,p.mode,p.offer])),'text/csv');},
+  doCheckin:()=>{
+    const q=g('ciq').value.trim().toLowerCase();if(!q)return;
+    const dq=digits(q);
+    let hits=DB.members.filter(m=>m.id.toLowerCase()===q||(dq.length>=4&&m.phone.endsWith(dq)));
+    if(!hits.length)hits=DB.members.filter(m=>m.name.toLowerCase().includes(q));
+    const box=g('cires');
+    if(!hits.length){UI.lastCheck='<div class="cires no"><div class="big">Not found</div><div class="hint" style="margin-top:8px">No member matches that. Check the ID or number, or add a new member.</div></div>';}
+    else if(hits.length>1){UI.lastCheck='<div class="panel" style="margin-bottom:22px"><h3>Several matches</h3>'+hits.slice(0,8).map(m=>'<div class="li"><span><b>'+esc(m.name)+'</b> · '+esc(m.id)+'</span><button class="btn primary sm" data-act="checkinId" data-id="'+m.id+'">Check in</button></div>').join('')+'</div>';}
+    else{UI.lastCheck=checkinCard(hits[0]);g('ciq').value='';}
+    render();
+  },
+  checkinId:id=>{UI.lastCheck=checkinCard(memberById(id));render();},
+  saveAdm:()=>{const v=Number(g('adm').value);if(!(v>=0)){toast('Enter a valid fee','err');return;}DB.settings.admissionFee=Math.round(v);save();toast('Admission fee set to '+money(v));},
+  newPlan:()=>openPlan(null),
+  editPlan:id=>openPlan(id),
+  savePlan:id=>{
+    const name=g('pl-name').value.trim(),months=Math.floor(Number(g('pl-months').value)),price=Number(g('pl-price').value);
+    if(!name){toast('Enter a plan name','err');return;}
+    if(!(months>=1)){toast('Duration must be at least 1 month','err');return;}
+    if(!(price>=0)){toast('Enter a valid price','err');return;}
+    const act=g('pl-active').checked;
+    if(id){Object.assign(planById(id),{name:name,months:months,price:price,active:act});}
+    else DB.plans.push({id:uid('p'),name:name,months:months,price:price,active:act});
+    save();closeModal();render();toast('Plan saved');
+  },
+  togglePlan:id=>{const p=planById(id);p.active=!p.active;save();render();},
+  delPlan:id=>{
+    if(DB.members.some(m=>m.planId===id)){toast('Members use this plan. Turn it off instead.','err');return;}
+    if(!confirm('Delete this plan?'))return;DB.plans=DB.plans.filter(p=>p.id!==id);save();render();
+  },
+  bulkPrice:openBulk,
+  saveBulk:()=>{const pct=Number(g('b-pct').value);if(!isFinite(pct)){toast('Enter a percentage','err');return;}DB.plans.forEach(p=>{p.price=Math.max(0,Math.round(p.price*(1+pct/100)/10)*10);});save();closeModal();render();toast('Prices updated by '+pct+'%');},
+  newOffer:()=>openOffer(null),
+  editOffer:id=>openOffer(id),
+  dupOffer:id=>openOffer(id,true),
+  saveOffer:id=>{
+    const name=g('of-name').value.trim(),type=g('of-type').value,value=Number(g('of-value').value)||0;
+    if(!name){toast('Name the offer','err');return;}
+    if((type==='percent'&&(value<=0||value>100))){toast('Percentage must be between 1 and 100','err');return;}
+    if((type==='flat'||type==='freedays')&&value<=0){toast('Enter a value above 0','err');return;}
+    if(g('of-to').value<g('of-from').value){toast('End date is before the start date','err');return;}
+    const o={name:name,desc:g('of-desc').value.trim(),type:type,value:type==='admission'?0:value,plans:$$('.of-plan:checked').map(x=>x.value),audience:g('of-aud').value,from:g('of-from').value,to:g('of-to').value,active:true};
+    if(id){Object.assign(DB.offers.find(x=>x.id===id),o);}else{o.id=uid('o');DB.offers.push(o);}
+    save();closeModal();render();toast('Offer saved');
+  },
+  toggleOffer:id=>{const o=DB.offers.find(x=>x.id===id);o.active=!o.active;save();render();},
+  delOffer:id=>{if(!confirm('Delete this offer? Past payments keep their record.'))return;DB.offers=DB.offers.filter(o=>o.id!==id);save();render();},
+  repTab:id=>{UI.rep=id;render();},
+  repCsv:()=>{const r=buildReport(UI.rep);download('report-'+UI.rep+'-'+todayISO()+'.csv',csv(r.columns,r.rows),'text/csv');},
+  repPrint:()=>{const r=buildReport(UI.rep),R=rangeDates();printHTML('<h2>'+esc(DB.settings.gymName)+'</h2><h3>'+esc(r.title)+'</h3><div style="margin-bottom:10px">'+fmtDate(R.from)+' to '+fmtDate(R.to)+'</div>'+reportHTML(r));},
+  backup:()=>download('muscle-mechanic-backup-'+todayISO()+'.json',JSON.stringify(DB,null,2),'application/json'),
+  restore:()=>g('importFile').click(),
+  resetDemo:()=>{if(!confirm('Replace everything with fresh demo data?'))return;const keep=DB.settings.adminAuth;DB=seed();if(keep)DB.settings.adminAuth=keep;save();render();toast('Demo data restored');},
+  clearAll:()=>{if(!confirm('Delete all members, payments and check-ins? Plans, offers and settings stay.'))return;DB.members=[];DB.payments=[];DB.attendance=[];save();render();toast('All members cleared');}
+};
+
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]');if(!el)return;
+  const act=el.dataset.act;
+  if(!SESSION)return;
+  if(SESSION.role==='member'&&!MEMBER_OK.includes(act))return;
+  const f=ACTIONS[act];if(f){e.preventDefault();f(el.dataset.id,el);}
+});
+document.addEventListener('change',e=>{
+  const k=e.target.dataset&&e.target.dataset.setting;if(!k)return;
+  let v=e.target.value;
+  if(k==='admissionFee'||k==='warnDays'){v=Math.max(k==='warnDays'?1:0,Math.round(Number(v)||0));e.target.value=v;}
+  if(k==='gymName'&&!v.trim()){toast('Gym name cannot be empty','err');e.target.value=DB.settings.gymName;return;}
+  if(k==='countryCode')v=digits(v)||'91';
+  DB.settings[k]=v;save();
+  const nm=DB.settings.gymName.trim().split(/\s+/),first=nm.shift();
+  g('brandName').innerHTML='<span>'+esc(first)+'</span>'+(nm.length?'<span class="y">'+esc(nm.join(' '))+'</span>':'');
+  toast('Saved');
+});
+g('importFile').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||!d.members||!d.plans||!d.settings||!d.payments)throw 0;DB=d;if(!DB.offers)DB.offers=[];if(!DB.attendance)DB.attendance=[];save();render();toast('Backup restored');}catch(x){toast('That file is not a valid backup','err');}e.target.value='';};
+  r.readAsText(f);
+});
+
+document.addEventListener('change',e=>{if(e.target.id==='s-fx'){try{localStorage.setItem(FXKEY,e.target.value);}catch(x){}applyFx();toast('Animations: '+e.target.options[e.target.selectedIndex].text);}});
+
+render();
+})();
+</script>
+</body>
+</html>
